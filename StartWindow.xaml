@@ -1,0 +1,79 @@
+﻿<UserControl x:Class="BoadService.StartWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"      
+             xmlns:local="clr-namespace:BoadService"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="600" >
+    
+    <UserControl.Resources>
+        <sys:Double x:Key = "ButtonHeigh">70</sys:Double>
+        <sys:Double x:Key="ButtonWidth">130</sys:Double>
+        <sys:Double x:Key="colWidth">150</sys:Double>
+        <sys:Double x:Key="colWidth2">150</sys:Double>
+        <sys:Double x:Key="tbHeight">26</sys:Double>
+    </UserControl.Resources>
+    
+    <Grid Margin="11">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+
+        <StackPanel Orientation="Horizontal" Margin="0,5,0,15" Grid.ColumnSpan="2">
+            <TextBlock Name="tbEcu" Text="ЭБУ: " VerticalAlignment="Center" Margin="20,0,0,0" />
+            <ComboBox x:Name="comboECU" Width="300" Margin="10,0,0,0" VerticalAlignment="Center" SelectionChanged="comboECU_SelectionChanged"/>
+            <Button Name="btnPing" Content="Поиск ЭБУ" Margin="10,5,0,5" Padding="3,3,3,3" Click="btnSearchNodes_Click"/>
+        </StackPanel>
+
+
+        <StackPanel Name="panelEcuHeader" Grid.Row="1" Grid.Column="0" >
+            <Button Content="Кодирование" Width="{StaticResource ButtonWidth}" Height="{StaticResource ButtonHeigh}" Margin="20,30,0,0" HorizontalAlignment="Left" Click="btnCoding_Click"/>
+            <Button Content="Измерения" Width="{StaticResource ButtonWidth}" Height="{StaticResource ButtonHeigh}" Margin="20,30,0,0" HorizontalAlignment="Left" Click="btnMeasuring_Click"/>
+            <Button Content="Стоп кадры ошибок" Width="{StaticResource ButtonWidth}" Height="{StaticResource ButtonHeigh}" Margin="20,30,0,0" HorizontalAlignment="Left" Click="btnFreezeFrames_Click"/>
+            <Button Content="Очистить ошибки" Width="{StaticResource ButtonWidth}" Height="{StaticResource ButtonHeigh}" Margin="20,30,0,0" HorizontalAlignment="Left" Click="btnClearFaults_Click"/>
+        </StackPanel>
+
+        <!--ECU Header-->
+        <StackPanel Margin="0,10,20,0" Grid.Row="1" Grid.Column="1">
+            <!--Информация-->
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Left" Background="DarkKhaki">
+                <Label Name="lbInfo" Content="Информация" FontWeight="Bold" Width="{StaticResource colWidth}" />
+                <TextBox IsReadOnly="True" Visibility="Hidden" Width="{StaticResource colWidth2}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Name="lbModel" Content="Модель:" Width="{StaticResource colWidth}" />
+                <TextBox Name="tbModel" IsReadOnly="True" Width="{StaticResource colWidth2}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Name="lbController" Content="Контроллер:" Width="{StaticResource colWidth}"  />
+                <TextBox Name="tbHW" IsReadOnly="True" Width="{StaticResource colWidth2}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Name="lbFwVersion" Content="Версия ПО:" Width="{StaticResource colWidth}"  />
+                <TextBox Name="tbVersion" IsReadOnly="True" Width="{StaticResource colWidth2}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Name="lbHwVersion" Content="Версия аппаратного обеспечения:" Width="{StaticResource colWidth}"  />
+                <TextBox Name="tbHvVersion" IsReadOnly="True" Width="{StaticResource colWidth2}" />
+            </StackPanel>
+
+            <!--Параметры-->
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Left" Background="DarkKhaki">
+                <Label Name="lbSysParameters" Content="Информация" FontWeight="Bold" Width="{StaticResource colWidth}" />
+                <TextBox IsReadOnly="True" Visibility="Hidden" Width="{StaticResource colWidth2}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Name="lbDateTime" Content="Время системы:" Width="{StaticResource colWidth}" />
+                <TextBox Name="tbDateTime" IsReadOnly="True" Width="{StaticResource colWidth2}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

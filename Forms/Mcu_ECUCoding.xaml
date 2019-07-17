@@ -1,0 +1,263 @@
+﻿<UserControl x:Class="BoadService.Mcu_ECUCoding"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BoadService"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <sys:Double x:Key="colWidth">350</sys:Double>
+        <sys:Double x:Key="colWidth2">150</sys:Double>
+        <sys:Double x:Key="tbHeight">26</sys:Double>
+        <sys:Double x:Key="cellW">55</sys:Double>
+        <sys:Double x:Key="btnH">30</sys:Double>
+        <sys:Double x:Key="btnW">80</sys:Double>
+        <LinearGradientBrush x:Key="BackgroundBrush" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FF7074A4" Offset="0.157"/>
+            <GradientStop Color="White" Offset="1"/>
+        </LinearGradientBrush>
+        <Style x:Key="lbCap" TargetType="Label">
+            <Setter Property="Height" Value="{StaticResource tbHeight}" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="DarkBlue" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!--<Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>-->
+
+        <TabControl TabStripPlacement="Left" Margin="10,20,10,10" Background="Transparent" Name="tabControl1" >
+            <TabControl.Resources>
+                <Style TargetType="{x:Type TabItem}" >
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="4" />
+                    <Setter Property="MinWidth" Value="150" />
+                </Style>
+            </TabControl.Resources>
+
+
+            <!--Общее-->
+            <TabItem Header="Общие" Name="tabItem1">
+                <StackPanel Margin="10,0,0,0">
+                    <!--Основные параметры-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblBasicConfiguration" Content="Основные параметры" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblDiagAddress" Content="Диагностический адрес:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbDiagnosticAddress" Height="23" Width="{StaticResource colWidth2}" Background="White"  />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblBaseCanId" Content="Базовый CAN ID:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbBaseCANID" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="Привод" Name="tabItem3" Height="28" VerticalAlignment="Top">
+                <StackPanel Margin="10,0,0,0">
+                    <!--Основные параметры-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblAbsValues" Content="Абсолютные значения" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMaxRpmD" Content="Максимальное число оборотов, об/мин:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMaxForwardSpeed" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMaxRpmR"  Content="Максимальный крутящий момент, Hм:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMaxTorque" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMaxMotorT"  Content="Максимальная температура мотора, град:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMaxMotorT" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMaxInverterT"  Content="Максимальное температура инвертора, град:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMaxInverterT" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblInvCoolingOn"  Content="Температура инвертора при включении охлаждения, град:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbInvCoolingOn" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMotorCoolingOn"  Content="Температура мотора при включении охлаждения, град:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMotorCoolingOn" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+
+
+            <TabItem Header="Рулевое управление" Name="tabItem5">
+                <StackPanel Margin="10,0,0,0">
+                    <!--Абсолютные параметры-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblSteerAbsVal" Content="Абсолютные параметры" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblOverTempMotor" Content="Максимальное значение обратной связи, 0.1V:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbsteerMaxVal" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblOverTempInverter" Content="Минимальное значение обратной связи, 0.1V:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbsteerMinVal" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblsteerMaxCurrent" Content="Максимальное ток, mA:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbsteerMaxCurrent" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblSteeringPeriodFlt" Content="Пропорциональный регулятор:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbSteeringKp" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblSteeringLengthFlt" Content="Интегральный регулятор:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbSteeringKi" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblAcc2NPos" Content="Дифференциальный регулятор:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbSteeringKd" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <!--Зависимость ограничения рекуперации от скорости-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblBrakingTorque" Content="Зависимость усилия руля от скорости" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+                    <!--Таблица усилие руля от скорости-->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Label Content="Скорость, об/мин" Style="{StaticResource lbCap}" Width="120" />
+                        <Label Content="Усилие, %" Style="{StaticResource lbCap}" Grid.Row="1" />
+
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBox x:Name="tbSpeed1" Width="{StaticResource cellW}" Background="White"/>
+                            <TextBox x:Name="tbSpeed2" Width="{StaticResource cellW}" Background="White"/>
+                            <TextBox x:Name="tbSpeed3" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbSpeed4" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbSpeed5" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbSpeed6" Width="{StaticResource cellW}" Background="White" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+                            <TextBox x:Name="tbMin1" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbMin2" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbMin3" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbMin4" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbMin5" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbMin6" Width="{StaticResource cellW}" Background="White" />
+                        </StackPanel>
+                    </Grid>
+                    
+                </StackPanel>
+            </TabItem>
+
+            
+            <TabItem Header="Трим" Name="tabItem6">
+                <StackPanel Margin="10,0,0,0">
+                    <!--Абсолютные параметры-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblTrimAbsVal" Content="Абсолютные параметры" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lbltrimUpPos" Content="Максимальное значение обратной связи, 0.1В:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbtrimMaxVal" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lbltrimDownPos" Content="Минимальное значение обратной связи, 0.1В:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbtrimMinVal" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lbltrimMaxCurrent" Content="Максимальное ток, mA:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbtrimMaxCurrent" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="Ручка акселератора" Name="tabItem7">
+                <StackPanel Margin="10,0,0,0">
+                    <!--Абсолютные параметры-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblAccAbsVal" Content="Абсолютные параметры" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblAcc1NPos" Content="Нейтральное положение, mV:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbAcc1NPos" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblAcc1Pos" Content="Макс. положение канал 1, mV:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbAcc1MaxPos" Height="23" Width="{StaticResource colWidth2}" Background="White"
+							/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblAcc2Pos" Content="Макс. положение канал 2, mV:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbAcc2MaxPos" Height="23" Width="{StaticResource colWidth2}" Background="White"
+							/>
+                    </StackPanel>
+                    
+                </StackPanel>
+            </TabItem>
+
+
+            <TabItem Header="Разное" Name="tabItem8">
+                <StackPanel Margin="10,0,0,0">
+                    <!--Разное-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblOther" Content="Разное" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblPowerControl" Content="Управление питанием:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <CheckBox Name="checkPowerManager"  Width="{StaticResource colWidth2}" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblIgnitionReact" Content="Реакция на изменение зажигания, мс:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbKeyOffTime" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblSwOffDelay" Content="Задержка перед выключением, мс:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbPowerOffDelay" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+
+                    <!--Заряд-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblCharging" Content="Разное" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMaxChargCurrent" Content="Макс. ток заряда, А:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMaxCharhCurrent" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblChargersNum" Content="Количество бортовых зарядных блоков:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbChargersNum" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</UserControl>

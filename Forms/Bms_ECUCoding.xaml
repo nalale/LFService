@@ -1,0 +1,387 @@
+﻿<UserControl x:Class="BoadService.Bms_ECUCoding"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BoadService"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <sys:Double x:Key="colWidth">350</sys:Double>
+        <sys:Double x:Key="colWidth2">150</sys:Double>
+        <sys:Double x:Key="tbHeight">26</sys:Double>
+        <sys:Double x:Key="cellW">55</sys:Double>
+        <sys:Double x:Key="cell2W">38</sys:Double>
+        <sys:Double x:Key="btnH">30</sys:Double>
+        <sys:Double x:Key="btnW">80</sys:Double>
+        <LinearGradientBrush x:Key="BackgroundBrush" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FF7074A4" Offset="0.157"/>
+            <GradientStop Color="White" Offset="1"/>
+        </LinearGradientBrush>
+            <Style x:Key="lbCap" TargetType="Label">
+            <Setter Property="Height" Value="{StaticResource tbHeight}" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="DarkBlue" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!--<Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>-->
+
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        
+        <TabControl TabStripPlacement="Left" Margin="10,20,10,10" Background="Transparent" Name="tabControl1" >
+            <TabControl.Resources>
+                <Style TargetType="{x:Type TabItem}" >
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="4" />
+                    <Setter Property="MinWidth" Value="150" />
+
+                </Style>
+            </TabControl.Resources>
+
+
+            <!--Общее-->
+            <TabItem Header="Общие" Name="tabItem1">
+                <StackPanel Margin="10,0,0,0">
+                    <!--Основные параметры-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblBasicConfiguration" Content="Основные параметры" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblDiagAddress" Content="Диагностический адрес:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbDiagnosticAddress" Height="23" Width="{StaticResource colWidth2}" Background="White"  />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblBatteryId" Content="Номер параллельной линии:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbBatteryID" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblModuleId" Content="Номер модуля в линии:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbModuleID" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblBaseCanId" Content="Базовый CAN ID:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbBaseCANID" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblWorkMode" Content="Режим работы:"  Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <ComboBox x:Name="cbWorkMode" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <!--Датчик тока-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblCurrentSensorConfiguration" Content="Датчик тока" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblSensorType" Content="Тип датчика:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <ComboBox x:Name="cbSensorType" Height="23" Width="{StaticResource colWidth2}" Background="White"  />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblInstallation" Content="Расположение:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <ComboBox x:Name="cbSensorDirection" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>                    
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="Мастер" Name="tabItem2">
+                <StackPanel Margin="10,0,0,0">
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblBatteries" Content="Модули"  FontWeight="Bold" Height="28" />
+                    </StackPanel>          
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblTotalCapacity" Content="Емкость модуля, Ач:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbTotalCapacity" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMaxDCL" Content="DCL модуля, А:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMaxDCL" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMaxCCL" Content="CCL модуля, А:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMaxCCL" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblModuleCntS" Content="Кол. модулей последовательно:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbModuleCountS" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblModuleCntP" Content="Кол. линий параллельно:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbModuleCountP" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMaxDisbalanceVoltageS" Content="Макс разница напряжений последовательно, В:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMaxDisbalanceVoltageS" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMaxDisbalanceVoltage" Content="Макс разница напряжений параллельно, В:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMaxDisbalanceVoltage" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+
+                    <!--Абсолютные значения-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblAbsValues" Content="Абсолютные значения" FontWeight="Bold" Height="28" />
+                    </StackPanel>                    
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblbMaxCellVoltage"  Content="Максимальное напряжение на ячейке, мВ:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMaxCellVoltage" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMinCellVoltage" Content="Минимальное напряжение на ячейке, мВ:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMinCellVoltage" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+
+                    <!--Зависимость ограничения тока от напряжения на ячейках-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblCurrentLimitVoltageDepend" Content="Зависимость ограничения тока от напряжения на ячейках" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+
+                    <!--Таблица от напряжения-->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Label Name="lblVolt" Content="Напр. мВ" Style="{StaticResource lbCap}" Width="90" />
+                        <Label Content="CCL, %" Style="{StaticResource lbCap}" Grid.Row="1" />
+                        <Label Content="DCL, %" Style="{StaticResource lbCap}" Grid.Row="2"/>
+
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBox x:Name="tbCellV1" Width="{StaticResource cellW}" Background="White"/>
+                            <TextBox x:Name="tbCellV2" Width="{StaticResource cellW}" Background="White"/>
+                            <TextBox x:Name="tbCellV3" Width="{StaticResource cellW}" Background="White"/>
+                            <TextBox x:Name="tbCellV4" Width="{StaticResource cellW}" Background="White"/>
+                            <TextBox x:Name="tbCellV5" Width="{StaticResource cellW}" Background="White"/>
+                            <TextBox x:Name="tbCellV6" Width="{StaticResource cellW}" Background="White"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+                            <TextBox x:Name="tbCCL1" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbCCL2" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbCCL3" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbCCL4" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbCCL5" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbCCL6" Width="{StaticResource cellW}" Background="White"  />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1">
+                            <TextBox x:Name="tbDCL1" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbDCL2" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbDCL3" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbDCL4" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbDCL5" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbDCL6" Width="{StaticResource cellW}" Background="White"  />
+                        </StackPanel>
+                    </Grid>
+
+                    <!--Зависимость ограничения тока от температуры на ячейках-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblTempLimit" Content="Зависимость ограничения тока от температуры на ячейках" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+
+                    <!--Таблица от температуры-->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Label Name="lblTemp" Content="Темп., °C" Style="{StaticResource lbCap}" Width="90" />
+                        <Label Content="CCL/DCL, %" Style="{StaticResource lbCap}" Grid.Row="1" />
+
+
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBox x:Name="tbCellT1" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbCellT2" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbCellT3" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbCellT4" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbCellT5" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbCellT6" Width="{StaticResource cellW}" Background="White" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+                            <TextBox x:Name="tbCL1" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbCL2" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbCL3" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbCL4" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbCL5" Width="{StaticResource cellW}" Background="White"  />
+                            <TextBox x:Name="tbCL6" Width="{StaticResource cellW}" Background="White"  />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </TabItem>
+
+
+            <TabItem Header="Модуль" Name="tabItem3">
+                <StackPanel Margin="10,0,0,0">
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblModules" Content="Модули" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblCellNum" Content="Количество ячеек в модуле:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbCellNum" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblBalancingTime" Content="Время включения балансировки, сек:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbBalancingTime" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMinBalancerLevel" Content="Минимальный порог напряжения для балансировки, мВ:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMinBalancerLevel" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblMaxBalancingDiff" Content="Допустимая разница напряжений ячеек, мВ:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbMaxBalancingDiff" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+
+                    <!--Зависимость ограничения тока от температуры на ячейках-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Content="OCV характеристика" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+
+                    <!--Таблица OCV-->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Label Name="lblOCV" Content="SOC, %" Style="{StaticResource lbCap}" Width="48" />
+                        <Label Content="U, mV" Style="{StaticResource lbCap}" Grid.Row="1" />
+
+
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBox x:Name="tbSoc1" Width="{StaticResource cell2W}" Background="White" />
+                            <TextBox x:Name="tbSoc2" Width="{StaticResource cell2W}" Background="White" />
+                            <TextBox x:Name="tbSoc3" Width="{StaticResource cell2W}" Background="White" />
+                            <TextBox x:Name="tbSoc4" Width="{StaticResource cell2W}" Background="White" />
+                            <TextBox x:Name="tbSoc5" Width="{StaticResource cell2W}" Background="White" />
+                            <TextBox x:Name="tbSoc6" Width="{StaticResource cell2W}" Background="White" />
+                            <TextBox x:Name="tbSoc7" Width="{StaticResource cell2W}" Background="White" />
+                            <TextBox x:Name="tbSoc8" Width="{StaticResource cell2W}" Background="White" />
+                            <TextBox x:Name="tbSoc9" Width="{StaticResource cell2W}" Background="White" />
+                            <TextBox x:Name="tbSoc10" Width="{StaticResource cell2W}" Background="White" />
+                            <TextBox x:Name="tbSoc11" Width="{StaticResource cell2W}" Background="White" />
+                            <TextBox x:Name="tbSoc12" Width="{StaticResource cell2W}" Background="White" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+                            <TextBox x:Name="tbSoc1Volt" Width="{StaticResource cell2W}" Background="White"  />
+                            <TextBox x:Name="tbSoc2Volt" Width="{StaticResource cell2W}" Background="White"  />
+                            <TextBox x:Name="tbSoc3Volt" Width="{StaticResource cell2W}" Background="White"  />
+                            <TextBox x:Name="tbSoc4Volt" Width="{StaticResource cell2W}" Background="White"  />
+                            <TextBox x:Name="tbSoc5Volt" Width="{StaticResource cell2W}" Background="White"  />
+                            <TextBox x:Name="tbSoc6Volt" Width="{StaticResource cell2W}" Background="White"  />
+                            <TextBox x:Name="tbSoc7Volt" Width="{StaticResource cell2W}" Background="White"  />
+                            <TextBox x:Name="tbSoc8Volt" Width="{StaticResource cell2W}" Background="White"  />
+                            <TextBox x:Name="tbSoc9Volt" Width="{StaticResource cell2W}" Background="White"  />
+                            <TextBox x:Name="tbSoc10Volt" Width="{StaticResource cell2W}" Background="White"  />
+                            <TextBox x:Name="tbSoc11Volt" Width="{StaticResource cell2W}" Background="White"  />
+                            <TextBox x:Name="tbSoc12Volt" Width="{StaticResource cell2W}" Background="White"  />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </TabItem>
+
+
+            <TabItem Header="Предзаряд" Name="tabItem5">
+                <StackPanel Margin="10,0,0,0">
+                    <!--Абсолютные параметры-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblPrecharge" Content="Абсолютные параметры" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblTimeLimit" Content="Максимальная длительность, мс:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbPreMaxDuration" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblZeroDuration" Content="Длительность нулевого тока, мс, мс:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbPreZeroDuration" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblZeroCurrentT" Content="Нулевой ток, мА:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbPreZeroCurrent" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblShortCircCurrent" Content="Ток при КЗ в нагрузке, А:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox  x:Name="tbPreMaxCurrent" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+
+                </StackPanel>
+            </TabItem>
+
+
+            <TabItem Header="Разное" Name="tabItem6">
+                <StackPanel Margin="10,0,0,0">
+                    <!--Разное-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
+                        <Label Name="lblOther" Content="Разное" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblCheckSticking" Content="Проверять залипание контакторов:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <CheckBox Name="checkContactor"  Width="{StaticResource colWidth2}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblCheckInterlock" Content="Проверять интерлок:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <CheckBox Name="checkInterlock"  Width="{StaticResource colWidth2}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblServerTime" Content="Сервер времени:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <CheckBox Name="checkTimeServer"  Width="{StaticResource colWidth2}" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblControledVcu" Content="Автономная работа:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <CheckBox Name="checkVcuControled"  Width="{StaticResource colWidth2}" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblSwitchedOff" Content="Отключен:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <CheckBox Name="checkOffline"  Width="{StaticResource colWidth2}" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblDebug" Content="Управление питанием:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <CheckBox Name="checkDebug"  Width="{StaticResource colWidth2}" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblPowerOffDelay" Content="Задержка выключения питания, мс:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbPowerOffDelay" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblIgnitionReact" Content="Реакция на изменение зажигания, мс:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox  x:Name="tbIgnitionReact" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>            
+        </TabControl>
+    </Grid>
+</UserControl>
