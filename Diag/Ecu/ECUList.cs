@@ -81,10 +81,14 @@ namespace BoadService
 			{
 				ecuModel = EcuModelId.mEcu;
 			}
-			else if (DiagAddress >= (byte)EcuDiagAddress.BATTERY_ECU_ID)
+			else if (DiagAddress >= (byte)EcuDiagAddress.BATTERY_ECU_ID && DiagAddress < (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID)
 			{
 				ecuModel = EcuModelId.bms;
-			}			
+			}		
+            else if(DiagAddress >= (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID)
+            {
+                ecuModel = EcuModelId.dEcu;
+            }
 
 			switch (ecuModel)
 			{
@@ -94,7 +98,8 @@ namespace BoadService
 					return new Main_ECU(ecuModel, DiagAddress);
 				case EcuModelId.bms:
 					return new Bms_ECU(ecuModel, DiagAddress);
-
+                case EcuModelId.dEcu:
+                    return new Display_ECU(ecuModel, DiagAddress);
 				default:
 					return new ECU(ecuModel, DiagAddress);
 

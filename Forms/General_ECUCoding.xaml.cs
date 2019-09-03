@@ -298,7 +298,7 @@ namespace BoadService
 
 				Marshal.FreeHGlobal(ptr);
 
-				bool res = await Global.diag.WriteDataByID((byte)CurrentEcu.Address, 1, buf);
+				bool res = await Global.diag.WriteDataByID((byte)CurrentEcu.Address, (byte)General_ECU.ObjectsIndex_e.didConfigStructIndex, buf);
 
                 return (res) ? ReadDataResult_e.RES_SUCCESSFUL : ReadDataResult_e.RES_OTHER_ERROR;
             }

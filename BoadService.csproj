@@ -62,6 +62,7 @@
     <Compile Include="Diag\DID.cs" />
     <Compile Include="Diag\DTC.cs" />
     <Compile Include="Diag\DTC_Category.cs" />
+    <Compile Include="Diag\Ecu\Display_ECU.cs" />
     <Compile Include="Diag\Ecu\Main_ECU.cs" />
     <Compile Include="Diag\Ecu\General_ECU.cs" />
     <Compile Include="Forms\ECUMeasure.xaml.cs">
@@ -72,6 +73,9 @@
     </Compile>
     <Compile Include="Forms\frmRepItemEditor.xaml.cs">
       <DependentUpon>frmRepItemEditor.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Display_ECUCoding.xaml.cs">
+      <DependentUpon>Display_ECUCoding.xaml</DependentUpon>
     </Compile>
     <Compile Include="Forms\General_ECUCoding.xaml.cs">
       <DependentUpon>General_ECUCoding.xaml</DependentUpon>
@@ -88,6 +92,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Forms\frmRepItemEditor.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Forms\Display_ECUCoding.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

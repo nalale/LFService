@@ -224,6 +224,7 @@ namespace BoadService
 		bms = 0x10,
 		gEcu = 0x11,
 		mEcu = 0x12,
+        dEcu = 0x13,
 	}
 
 	public enum EcuDiagAddress
@@ -232,6 +233,7 @@ namespace BoadService
 		GENERAL_ECU_DIAG_ID = 1,
 		MAIN_ECU_DIAG_ID	= 10,
 		BATTERY_ECU_ID		= 11,
+        DISPLAY_ECU_DIAG_ID = 51,
 	}
 
 
