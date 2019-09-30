@@ -65,7 +65,7 @@ namespace BoadService
 			public short addition_4;
 			public short addition_5;
 			public short addition_6;
-			public short addition_7;
+//			public short addition_7;
             
 			// Контрольная сумма
 			public ushort CRC;		

@@ -170,14 +170,14 @@ namespace BoadService.Diag
 							break;
 					}
 				}	
-				else if((msg.id & ~0x1F) == 0x700)
+				else if((msg.id & ~0x7F) == 0x700)
 				{
                     if (OnRxIDsComplete != null)
                     {
                         N_Message loc_msg = new N_Message();
 
                         loc_msg.Result = N_Res.OK_UPDATE_PROFILE;
-                        loc_msg.TA = (byte)(msg.id & 0x1F);
+                        loc_msg.TA = (byte)(msg.id & 0x7F);
 
                         OnRxIDsComplete?.Invoke(loc_msg);                        
                     }

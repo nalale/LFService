@@ -41,18 +41,18 @@ namespace BoadService
 			dEcu.Data.Index = Convert.ToByte(tbModuleID.Text);
 
 			// Батареи
-			dEcu.Data.MotorRpm[0] = Convert.ToByte(tbSpeed1.Text);
-			dEcu.Data.MotorRpm[1] = Convert.ToByte(tbSpeed2.Text);
-			dEcu.Data.MotorRpm[2] = Convert.ToByte(tbSpeed3.Text);
-			dEcu.Data.MotorRpm[3] = Convert.ToByte(tbSpeed4.Text);
-			dEcu.Data.MotorRpm[4] = Convert.ToByte(tbSpeed5.Text);
-			dEcu.Data.MotorRpm[5] = Convert.ToByte(tbSpeed6.Text);
-            dEcu.Data.MotorRpm[6] = Convert.ToByte(tbMin1.Text);
-            dEcu.Data.MotorRpm[7] = Convert.ToByte(tbMin2.Text);
-            dEcu.Data.MotorRpm[8] = Convert.ToByte(tbMin3.Text);
-            dEcu.Data.MotorRpm[9] = Convert.ToByte(tbMin4.Text);
-            dEcu.Data.MotorRpm[10] = Convert.ToByte(tbMin5.Text);
-            dEcu.Data.MotorRpm[11] = Convert.ToByte(tbMin6.Text);
+			dEcu.Data.MotorRpm[0] = Convert.ToInt16(tbSpeed1.Text);
+			dEcu.Data.MotorRpm[1] = Convert.ToInt16(tbSpeed2.Text);
+			dEcu.Data.MotorRpm[2] = Convert.ToInt16(tbSpeed3.Text);
+			dEcu.Data.MotorRpm[3] = Convert.ToInt16(tbSpeed4.Text);
+			dEcu.Data.MotorRpm[4] = Convert.ToInt16(tbSpeed5.Text);
+			dEcu.Data.MotorRpm[5] = Convert.ToInt16(tbSpeed6.Text);
+            dEcu.Data.MotorRpm[6] = Convert.ToInt16(tbMin1.Text);
+            dEcu.Data.MotorRpm[7] = Convert.ToInt16(tbMin2.Text);
+            dEcu.Data.MotorRpm[8] = Convert.ToInt16(tbMin3.Text);
+            dEcu.Data.MotorRpm[9] = Convert.ToInt16(tbMin4.Text);
+            dEcu.Data.MotorRpm[10] = Convert.ToInt16(tbMin5.Text);
+            dEcu.Data.MotorRpm[11] = Convert.ToInt16(tbMin6.Text);
 
             dEcu.Data.SoC[0] = Convert.ToByte(tbSoc1.Text);
 			dEcu.Data.SoC[1] = Convert.ToByte(tbSoc2.Text);
@@ -80,18 +80,18 @@ namespace BoadService
             dEcu.Data.TrimPosition[10] = Convert.ToByte(tbTrimPwm5.Text);
             dEcu.Data.TrimPosition[11] = Convert.ToByte(tbTrimPwm6.Text);
 
-            dEcu.Data.SpecPower[0] = Convert.ToByte(tbCons1.Text);
-            dEcu.Data.SpecPower[1] = Convert.ToByte(tbCons2.Text);
-            dEcu.Data.SpecPower[2] = Convert.ToByte(tbCons3.Text);
-            dEcu.Data.SpecPower[3] = Convert.ToByte(tbCons4.Text);
-            dEcu.Data.SpecPower[4] = Convert.ToByte(tbCons5.Text);
-            dEcu.Data.SpecPower[5] = Convert.ToByte(tbCons6.Text);
-            dEcu.Data.SpecPower[6] = Convert.ToByte(tbConsPwm1.Text);
-            dEcu.Data.SpecPower[7] = Convert.ToByte(tbConsPwm2.Text);
-            dEcu.Data.SpecPower[8] = Convert.ToByte(tbConsPwm3.Text);
-            dEcu.Data.SpecPower[9] = Convert.ToByte(tbConsPwm4.Text);
-            dEcu.Data.SpecPower[10] = Convert.ToByte(tbConsPwm5.Text);
-            dEcu.Data.SpecPower[11] = Convert.ToByte(tbConsPwm6.Text);
+            dEcu.Data.SpecPower[0] = Convert.ToInt16(tbCons1.Text);
+            dEcu.Data.SpecPower[1] = Convert.ToInt16(tbCons2.Text);
+            dEcu.Data.SpecPower[2] = Convert.ToInt16(tbCons3.Text);
+            dEcu.Data.SpecPower[3] = Convert.ToInt16(tbCons4.Text);
+            dEcu.Data.SpecPower[4] = Convert.ToInt16(tbCons5.Text);
+            dEcu.Data.SpecPower[5] = Convert.ToInt16(tbCons6.Text);
+            dEcu.Data.SpecPower[6] = Convert.ToInt16(tbConsPwm1.Text);
+            dEcu.Data.SpecPower[7] = Convert.ToInt16(tbConsPwm2.Text);
+            dEcu.Data.SpecPower[8] = Convert.ToInt16(tbConsPwm3.Text);
+            dEcu.Data.SpecPower[9] = Convert.ToInt16(tbConsPwm4.Text);
+            dEcu.Data.SpecPower[10] = Convert.ToInt16(tbConsPwm5.Text);
+            dEcu.Data.SpecPower[11] = Convert.ToInt16(tbConsPwm6.Text);
 
 
             dEcu.Data.PowerOffDelay_ms = Convert.ToUInt16(tbPowerOffDelay.Text);
@@ -174,7 +174,7 @@ namespace BoadService
 		async public Task<bool> Download()
 		{
 			IntPtr ptr;
-			int ProfileSize = Marshal.SizeOf(typeof(General_ECU.CodingData_t));
+			int ProfileSize = Marshal.SizeOf(typeof(Display_ECU.CodingData_t));
 			
 			ptr = Marshal.AllocHGlobal(ProfileSize);
 			byte[] buf = await Global.diag.ReadDataByID((byte)CurrentEcu.Address, 0);
@@ -200,7 +200,7 @@ namespace BoadService
 			IntPtr ptr;
 			if (FormToStruct())
 			{				
-				int ProfileSize = Marshal.SizeOf(typeof(General_ECU.CodingData_t));		
+				int ProfileSize = Marshal.SizeOf(typeof(Display_ECU.CodingData_t));		
 				
 				ptr = Marshal.AllocHGlobal(ProfileSize);
 				Marshal.StructureToPtr(dEcu.Data, ptr, false);

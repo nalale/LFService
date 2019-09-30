@@ -211,12 +211,6 @@
                 </StackPanel>
             </TabItem>
 
-            <TabItem Header="Таблица сообщений" Name="tabItem3">
-                <Grid Margin="10,0,0,0">
-                    <ListBox x:Name="listRoutes" />
-                </Grid>
-            </TabItem>
-
             <TabItem Header="Разное" Name="tabItem4">
                 <StackPanel Margin="10,0,0,0">
                     <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">

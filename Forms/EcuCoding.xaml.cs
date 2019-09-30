@@ -133,12 +133,16 @@ namespace BoadService
 			{
 				ecuModel = EcuModelId.mEcu;
 			}
-			else if(DiagAddress >= (byte)EcuDiagAddress.BATTERY_ECU_ID)
+			else if(DiagAddress >= (byte)EcuDiagAddress.BATTERY_ECU_ID && DiagAddress < (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID)
 			{
 				ecuModel = EcuModelId.bms;
 			}
+            else if (DiagAddress >= (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID)
+            {
+                ecuModel = EcuModelId.dEcu;
+            }
 
-			if (ecuModel == EcuModelId.none)
+            if (ecuModel == EcuModelId.none)
 				return;
 			
 			codingForm = null; 
@@ -154,6 +158,9 @@ namespace BoadService
 				case EcuModelId.mEcu:
 					codingForm = new Mcu_ECUCoding();
 					break;
+                case EcuModelId.dEcu:
+                    codingForm = new Display_ECUCoding();
+                    break;
 			}
 
 
