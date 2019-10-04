@@ -187,7 +187,7 @@ namespace BoadService
 				}
 			}
 
-			comboECU.ItemsSource = Global.EcuList.Items.Select((ecu) => { return new StringBuilder(ecu.Model + ecu.Address.ToString()).ToString(); });
+			comboECU.ItemsSource = Global.EcuList.Items.Select((ecu) => { return new StringBuilder(Enum.GetName(typeof(EcuModelId), ecu.ModelId) + "\t(" + ecu.Address.ToString() + ")").ToString(); });
 			if (comboECU.Items.Count > 0)
 				comboECU.SelectedIndex = 0;
 		}

@@ -9,7 +9,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Xml;
 using System.Runtime.InteropServices;
 
 namespace BoadService
@@ -169,8 +169,6 @@ namespace BoadService
 
 
 		#region Coding
-
-
 		async public Task<bool> Download()
 		{
 			IntPtr ptr;
@@ -224,13 +222,38 @@ namespace BoadService
 
 		public void Open(string path)
 		{
-
-		}
-
+            // Загружаем файл
+            XmlDocument doc = new XmlDocument();
+            try
+            {
+                doc.Load(path);
+                if (LoadFromXml(doc.DocumentElement))
+                {
+                    StructToForm();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Не удалось загрузить файл. \nОшибка: " + ex.Message);
+            }
+        }
 		public void Save(string path)
 		{
+            if (FormToStruct() == false)
+                return;
 
-		}
+            XmlDocument doc = new XmlDocument();
+            doc.AppendChild(ToXml(doc));
+
+
+            // Запись документа в файл
+            XmlTextWriter writer = new XmlTextWriter(path, System.Text.Encoding.UTF8);
+            writer.Formatting = Formatting.Indented;
+            writer.IndentChar = ' '; // задаем отступ
+            doc.WriteContentTo(writer);
+            writer.Flush();
+            writer.Close();
+        }
 
 		#endregion
 
@@ -238,5 +261,122 @@ namespace BoadService
 		{
 
 		}
-	}
+
+        #region XML
+
+        XmlNode ToXml(XmlDocument doc)
+        {
+            XmlElement root = doc.CreateElement("Coding");
+
+            XmlElement el;
+
+            AddXmlElement(root, "EcuClassId", ((int)CurrentEcu.ModelId).ToString());
+
+            AddXmlElement(root, "DiagnosticID", dEcu.Data.DiagnosticID.ToString());
+            AddXmlElement(root, "Index", dEcu.Data.Index.ToString());
+
+            // MotorRpm
+            el = AddXmlElement(root, "MotorRpmpoint", "");
+            foreach (Int16 val in dEcu.Data.MotorRpm)
+                AddXmlElement(el, "val", val.ToString());
+            // SOCpoint
+            el = AddXmlElement(root, "Socpoint", "");
+            foreach (Int16 val in dEcu.Data.SoC)
+                AddXmlElement(el, "val", val.ToString());
+            // TrimPospoint
+            el = AddXmlElement(root, "TrimPospoint", "");
+            foreach (Int16 val in dEcu.Data.TrimPosition)
+                AddXmlElement(el, "val", val.ToString());
+            // SpecPowerpoint
+            el = AddXmlElement(root, "SpecPowerpoint", "");
+            foreach (Int16 val in dEcu.Data.SpecPower)
+                AddXmlElement(el, "val", val.ToString());
+
+
+            AddXmlElement(root, "PowerOffDelay_ms", dEcu.Data.PowerOffDelay_ms.ToString());
+            AddXmlElement(root, "KeyOffTime_ms", dEcu.Data.KeyOffTime_ms.ToString());
+
+            return root;
+        }
+
+        bool LoadFromXml(XmlNode node)
+        {
+            foreach (XmlNode n in node.ChildNodes)
+            {
+                if (n.Name == "EcuClassId")
+                {
+                    EcuModelId cid = (EcuModelId)Convert.ToInt32(n.InnerText);
+                    if (cid != CurrentEcu.ModelId)
+                    {
+                        MessageBox.Show("Файл кодировок предназначен для ЭБУ класса \"" + cid.ToString() + "\".");
+                        return false;
+                    }
+                }
+                else if (n.Name == "DiagnosticID")
+                    dEcu.Data.DiagnosticID = (byte)Convert.ToByte(n.InnerText);
+                else if (n.Name == "Index")
+                    dEcu.Data.Index = (byte)Convert.ToByte(n.InnerText);
+
+                else if (n.Name == "MotorRpmpoint")
+                {
+                    int i = 0;
+                    foreach (XmlNode val in n.ChildNodes)
+                    {
+                        if (i < Bms_ECU.VoltageArrayLen)
+                            dEcu.Data.MotorRpm[i] = Convert.ToInt16(val.InnerText);
+                        i++;
+                    }
+                }
+                else if (n.Name == "Socpoint")
+                {
+                    int i = 0;
+                    foreach (XmlNode val in n.ChildNodes)
+                    {
+                        if (i < Bms_ECU.TemperatureArrayLen)
+                            dEcu.Data.SoC[i] = Convert.ToInt16(val.InnerText);
+                        i++;
+                    }
+                }
+                else if (n.Name == "TrimPospoint")
+                {
+                    int i = 0;
+                    foreach (XmlNode val in n.ChildNodes)
+                    {
+                        if (i < Bms_ECU.OCVArrayLen)
+                            dEcu.Data.TrimPosition[i] = Convert.ToInt16(val.InnerText);
+                        i++;
+                    }
+                }
+                else if (n.Name == "SpecPowerpoint")
+                {
+                    int i = 0;
+                    foreach (XmlNode val in n.ChildNodes)
+                    {
+                        if (i < Bms_ECU.OCVArrayLen)
+                            dEcu.Data.SpecPower[i] = Convert.ToInt16(val.InnerText);
+                        i++;
+                    }
+                }
+
+                else if (n.Name == "PowerOffDelay_ms")
+                    dEcu.Data.PowerOffDelay_ms = Convert.ToUInt16(n.InnerText);
+                else if (n.Name == "KeyOffTime_ms")
+                    dEcu.Data.KeyOffTime_ms = Convert.ToUInt16(n.InnerText);
+
+            }
+
+            return true;
+        }
+
+
+        XmlElement AddXmlElement(XmlElement root, string name, string val)
+        {
+            XmlElement el = root.OwnerDocument.CreateElement(name);
+            el.InnerText = val;
+            root.AppendChild(el);
+            return el;
+        }
+
+        #endregion
+    }
 }

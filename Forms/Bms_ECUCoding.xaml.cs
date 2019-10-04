@@ -27,8 +27,7 @@ namespace BoadService
 		{
 			InitializeComponent();
 
-            this.Loaded += FrmBmsCoding_Loaded;
-            //bms = new Bms_ECU(EcuModelId.bms, );
+            this.Loaded += FrmBmsCoding_Loaded;            
 
             bms = Global.EcuList.CurrentEcu as Bms_ECU;
 			FillLists();			
@@ -178,7 +177,6 @@ namespace BoadService
 
 			return true;
 		}
-
 		void StructToForm()
 		{
 			tbDiagnosticAddress.Text = bms.Data.DiagnosticID.ToString();
@@ -291,7 +289,6 @@ namespace BoadService
 
 		#region Coding
 
-
 		async public Task<bool> Download()
 		{
 			IntPtr ptr;
@@ -351,7 +348,6 @@ namespace BoadService
 
 
 		}
-
 		public async Task<ReadDataResult_e> Upload()
 		{
 			IntPtr ptr;
