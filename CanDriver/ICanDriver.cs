@@ -70,7 +70,7 @@ namespace DEService
 		{
 			//string pre = "0x";
 			string pre = "";
-			bool decodeUDS = true;
+			
 
 			string s;
 			s = pre + id.ToString("X") + " " + (Ext ? "X " : "  ");
@@ -78,13 +78,6 @@ namespace DEService
 			{
 				s += pre + data[i].ToString("X2") + " ";
 			}
-
-			//if (decodeUDS)
-			//{
-			//	UDS.PCI_SF f = new UDS.PCI_SF();
-			//	f.Value = data[0];
-			//	s += f.FrameType;
-			//}
 
 			return s;
 		}

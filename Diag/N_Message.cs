@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BoadService.Diag
+namespace MFService.Diag
 {
 	public class N_Message
 	{

@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Runtime.InteropServices;
 
-namespace BoadService
+namespace MFService
 {
 	/// <summary>
 	/// Interaction logic for Mcu_ECUCoding.xaml
@@ -42,6 +42,18 @@ namespace BoadService
             tbAcc1MaxPos.Text = mEcu.Data.AccPedalFstCh_MaxV.ToString();
             tbAcc1NPos.Text = mEcu.Data.AccPedalFstCh_0V.ToString();
             tbAcc2MaxPos.Text = mEcu.Data.AccPedalSndCh_MaxV.ToString();
+            tbThHandle1.Text = mEcu.Data.TorqueDemandTable[0].ToString();
+            tbThHandle2.Text = mEcu.Data.TorqueDemandTable[1].ToString();
+            tbThHandle3.Text = mEcu.Data.TorqueDemandTable[2].ToString();
+            tbThHandle4.Text = mEcu.Data.TorqueDemandTable[3].ToString();
+            tbThHandle5.Text = mEcu.Data.TorqueDemandTable[4].ToString();
+            tbThHandle6.Text = mEcu.Data.TorqueDemandTable[5].ToString();
+            tbDemandT1.Text = mEcu.Data.TorqueDemandTable[6].ToString();
+            tbDemandT2.Text = mEcu.Data.TorqueDemandTable[7].ToString();
+            tbDemandT3.Text = mEcu.Data.TorqueDemandTable[8].ToString();
+            tbDemandT4.Text = mEcu.Data.TorqueDemandTable[9].ToString();
+            tbDemandT5.Text = mEcu.Data.TorqueDemandTable[10].ToString();
+            tbDemandT6.Text = mEcu.Data.TorqueDemandTable[11].ToString();
 
             // Привод
             tbMaxForwardSpeed.Text = mEcu.Data.MaxMotorSpeedD.ToString();
@@ -50,6 +62,7 @@ namespace BoadService
             tbMaxInverterT.Text = mEcu.Data.MaxInverterT.ToString();
             tbInvCoolingOn.Text = mEcu.Data.InvCoolingOn.ToString();
             tbMotorCoolingOn.Text = mEcu.Data.MotorCoolingOn.ToString();
+            tbRateMotorTorque.Text = mEcu.Data.RateMotorTorque_Nm.ToString();
 
             // Рулевое управление
             tbsteerMaxVal.Text = mEcu.Data.SteeringMaxVal_0p1V.ToString();
@@ -76,7 +89,7 @@ namespace BoadService
             // Трим
             tbtrimMaxVal.Text = mEcu.Data.TrimMaxVal_0p1V.ToString();
             tbtrimMinVal.Text = mEcu.Data.TrimMinVal_0p1V.ToString();
-            tbtrimMaxCurrent.Text = mEcu.Data.TrimMaxCurrent_0p1A.ToString();
+            tbtrimMaxCurrent.Text = mEcu.Data.TrimUpLimitDrive_0p1V.ToString();
 
             
 
@@ -99,6 +112,18 @@ namespace BoadService
             mEcu.Data.AccPedalFstCh_MaxV = Convert.ToByte(tbAcc1MaxPos.Text);
             mEcu.Data.AccPedalFstCh_0V = Convert.ToByte(tbAcc1NPos.Text);
             mEcu.Data.AccPedalSndCh_MaxV = Convert.ToByte(tbAcc2MaxPos.Text);
+            mEcu.Data.TorqueDemandTable[0] =Convert.ToByte(tbThHandle1.Text);
+            mEcu.Data.TorqueDemandTable[1] =Convert.ToByte(tbThHandle2.Text);
+            mEcu.Data.TorqueDemandTable[2] =Convert.ToByte(tbThHandle3.Text);
+            mEcu.Data.TorqueDemandTable[3] =Convert.ToByte(tbThHandle4.Text);
+            mEcu.Data.TorqueDemandTable[4] =Convert.ToByte(tbThHandle5.Text);
+            mEcu.Data.TorqueDemandTable[5] =Convert.ToByte(tbThHandle6.Text);
+            mEcu.Data.TorqueDemandTable[6] = Convert.ToByte(tbDemandT1.Text );
+            mEcu.Data.TorqueDemandTable[7] = Convert.ToByte(tbDemandT2.Text );
+            mEcu.Data.TorqueDemandTable[8] = Convert.ToByte(tbDemandT3.Text );
+            mEcu.Data.TorqueDemandTable[9] = Convert.ToByte(tbDemandT4.Text );
+            mEcu.Data.TorqueDemandTable[10]= Convert.ToByte(tbDemandT5.Text );
+            mEcu.Data.TorqueDemandTable[11] = Convert.ToByte(tbDemandT6.Text);
 
             // Привод
             mEcu.Data.MaxMotorSpeedD = Convert.ToUInt16(tbMaxForwardSpeed.Text);
@@ -107,6 +132,7 @@ namespace BoadService
             mEcu.Data.MaxInverterT = Convert.ToInt16(tbMaxInverterT.Text);
             mEcu.Data.InvCoolingOn = Convert.ToByte(tbInvCoolingOn.Text);
             mEcu.Data.MotorCoolingOn = Convert.ToByte(tbMotorCoolingOn.Text);
+            mEcu.Data.RateMotorTorque_Nm = Convert.ToUInt16(tbRateMotorTorque.Text);
 
             // Рулевое управление
             mEcu.Data.SteeringMaxVal_0p1V = Convert.ToByte(tbsteerMaxVal.Text);
@@ -126,14 +152,14 @@ namespace BoadService
             mEcu.Data.SteeringBrakeSpeedTable[10] = Convert.ToUInt16(tbMin5.Text);
             mEcu.Data.SteeringBrakeSpeedTable[11] = Convert.ToUInt16(tbMin6.Text);
 
-            mEcu.Data.SteeringKp = Convert.ToByte(tbSteeringKp.Text);
-            mEcu.Data.SteeringKi = Convert.ToByte(tbSteeringKi.Text);
-            mEcu.Data.SteeringKd = Convert.ToByte(tbSteeringKd.Text);
+            mEcu.Data.SteeringKp = Convert.ToInt16(tbSteeringKp.Text);
+            mEcu.Data.SteeringKi = Convert.ToInt16(tbSteeringKi.Text);
+            mEcu.Data.SteeringKd = Convert.ToInt16(tbSteeringKd.Text);
 
             // Трим
             mEcu.Data.TrimMaxVal_0p1V = Convert.ToByte(tbtrimMaxVal.Text);
             mEcu.Data.TrimMinVal_0p1V = Convert.ToByte(tbtrimMinVal.Text);
-            mEcu.Data.TrimMaxCurrent_0p1A = Convert.ToInt16(tbtrimMaxCurrent.Text);
+            mEcu.Data.TrimUpLimitDrive_0p1V = Convert.ToInt16(tbtrimMaxCurrent.Text);
 
             // Разное
             mEcu.IsPowerManger = Convert.ToBoolean(checkPowerManager.IsChecked);
@@ -272,7 +298,7 @@ namespace BoadService
             AddXmlElement(root, "SteeringMaxCurrent_0p1A", mEcu.Data.SteeringMaxCurrent_0p1A.ToString());
             AddXmlElement(root, "SteeringMinVal_0p1V", mEcu.Data.SteeringMinVal_0p1V.ToString());
             AddXmlElement(root, "TrimMaxVal_0p1V", mEcu.Data.TrimMaxVal_0p1V.ToString());
-            AddXmlElement(root, "TrimMaxCurrent_0p1A", mEcu.Data.TrimMaxCurrent_0p1A.ToString());
+            AddXmlElement(root, "TrimMaxCurrent_0p1A", mEcu.Data.TrimUpLimitDrive_0p1V.ToString());
             AddXmlElement(root, "TrimMinVal_0p1V", mEcu.Data.TrimMinVal_0p1V.ToString());
             AddXmlElement(root, "IsPowerManger", mEcu.IsPowerManger.ToString());
 
@@ -281,6 +307,10 @@ namespace BoadService
             el = AddXmlElement(root, "SteeringBrakeSpeedTable", "");
             foreach (Int16 val in mEcu.Data.SteeringBrakeSpeedTable)
                 AddXmlElement(el, "val", val.ToString());
+
+            AddXmlElement(root, "MaxChargingCurrent_A", mEcu.Data.MaxChargingCurrent_A.ToString());
+            AddXmlElement(root, "ChargersNumber", mEcu.Data.ChargersNumber.ToString());
+            AddXmlElement(root, "RateMotorTorque_Nm", mEcu.Data.RateMotorTorque_Nm.ToString());
 
             return root;
         }
@@ -307,13 +337,13 @@ namespace BoadService
                 else if (n.Name == "AccPedalFstCh_MaxV")
                     mEcu.Data.AccPedalFstCh_MaxV = Convert.ToByte(n.InnerText);
                 else if (n.Name == "fltSteeringPeriod")
-                    mEcu.Data.SteeringKp = Convert.ToByte(n.InnerText);
+                    mEcu.Data.SteeringKp = Convert.ToInt16(n.InnerText);
                 else if (n.Name == "AccPedalSndCh_0V")
-                    mEcu.Data.SteeringKd = Convert.ToByte(n.InnerText);
+                    mEcu.Data.SteeringKd = Convert.ToInt16(n.InnerText);
                 else if (n.Name == "AccPedalSndCh_MaxV")
                     mEcu.Data.AccPedalSndCh_MaxV = Convert.ToByte(n.InnerText);
                 else if (n.Name == "fltSteeringLength")
-                    mEcu.Data.SteeringKi = Convert.ToByte(n.InnerText);
+                    mEcu.Data.SteeringKi = Convert.ToInt16(n.InnerText);
                 else if (n.Name == "BaseCanId")
                     mEcu.Data.BaseCanId = Convert.ToUInt16(n.InnerText);
                 else if (n.Name == "KeyOffTime_ms")
@@ -335,7 +365,7 @@ namespace BoadService
                 else if (n.Name == "SteeringMinVal_0p1V")
                     mEcu.Data.SteeringMinVal_0p1V = Convert.ToByte(n.InnerText);
                 else if (n.Name == "TrimMaxCurrent_0p1A")
-                    mEcu.Data.TrimMaxCurrent_0p1A = Convert.ToInt16(n.InnerText);
+                    mEcu.Data.TrimUpLimitDrive_0p1V = Convert.ToInt16(n.InnerText);
                 else if (n.Name == "TrimMaxVal_0p1V")
                     mEcu.Data.TrimMaxVal_0p1V = Convert.ToByte(n.InnerText);
                 else if (n.Name == "TrimMinVal_0p1V")
@@ -354,6 +384,12 @@ namespace BoadService
                         i++;
                     }
                 }
+                else if (n.Name == "MaxChargingCurrent_A")
+                    mEcu.Data.MaxChargingCurrent_A = Convert.ToByte(n.InnerText);
+                else if (n.Name == "ChargersNumber")
+                    mEcu.Data.ChargersNumber = Convert.ToByte(n.InnerText);
+                else if (n.Name == "RateMotorTorque_Nm")
+                    mEcu.Data.RateMotorTorque_Nm = Convert.ToUInt16(n.InnerText);
             }
 
             return true;

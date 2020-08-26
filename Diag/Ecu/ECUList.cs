@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BoadService
+namespace MFService
 {
 	public class EcuList
 	{
@@ -73,22 +73,23 @@ namespace BoadService
 		{
 			EcuModelId ecuModel = EcuModelId.none;
 
-			if (DiagAddress >= (byte)EcuDiagAddress.GENERAL_ECU_DIAG_ID && DiagAddress < (byte)EcuDiagAddress.MAIN_ECU_DIAG_ID)
+			if (DiagAddress >= (byte)EcuDiagAddress.GENERAL_ECU_DIAG_ID && DiagAddress < (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID)
 			{
 				ecuModel = EcuModelId.gEcu;
+			}
+			else if (DiagAddress >= (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID && DiagAddress < (byte)EcuDiagAddress.MAIN_ECU_DIAG_ID)
+			{
+				ecuModel = EcuModelId.dEcu;
 			}
 			else if (DiagAddress >= (byte)EcuDiagAddress.MAIN_ECU_DIAG_ID && DiagAddress < (byte)EcuDiagAddress.BATTERY_ECU_ID)
 			{
 				ecuModel = EcuModelId.mEcu;
 			}
-			else if (DiagAddress >= (byte)EcuDiagAddress.BATTERY_ECU_ID && DiagAddress < (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID)
+			else if (DiagAddress >= (byte)EcuDiagAddress.BATTERY_ECU_ID)
 			{
 				ecuModel = EcuModelId.bms;
 			}		
-            else if(DiagAddress >= (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID)
-            {
-                ecuModel = EcuModelId.dEcu;
-            }
+            
 
 			switch (ecuModel)
 			{
@@ -101,8 +102,7 @@ namespace BoadService
                 case EcuModelId.dEcu:
                     return new Display_ECU(ecuModel, DiagAddress);
 				default:
-					return new ECU(ecuModel, DiagAddress);
-
+					return null;
 			}
 		}
 

@@ -11,9 +11,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using static BoadService.General_ECU;
+using static MFService.General_ECU;
 
-namespace BoadService
+namespace MFService
 {
 	/// <summary>
 	/// Логика взаимодействия для frmSearchECU.xaml

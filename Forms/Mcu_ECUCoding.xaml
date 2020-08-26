@@ -1,9 +1,9 @@
-﻿<UserControl x:Class="BoadService.Mcu_ECUCoding"
+﻿<UserControl x:Class="MFService.Mcu_ECUCoding"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:BoadService"
+        xmlns:local="clr-namespace:MFService"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d">
 
@@ -76,6 +76,10 @@
                     <StackPanel Orientation="Horizontal">
                         <Label Name="lblMaxRpmR"  Content="Максимальный крутящий момент, Hм:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbMaxTorque" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblRateMotorTorque"  Content="Номинальный крутящий момент, Hм:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbRateMotorTorque" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Name="lblMaxMotorT"  Content="Максимальная температура мотора, град:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
@@ -181,16 +185,16 @@
                         <Label Name="lblTrimAbsVal" Content="Абсолютные параметры" FontWeight="Bold" Height="28" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <Label Name="lbltrimUpPos" Content="Максимальное значение обратной связи, 0.1В:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <Label Name="lbltrimUpPos" Content="Обратная связь верхнего положения, 0.1В:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbtrimMaxVal" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <Label Name="lbltrimDownPos" Content="Минимальное значение обратной связи, 0.1В:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <Label Name="lbltrimDownPos" Content="Обратная связь нижнего положения, 0.1В:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbtrimMinVal" Height="23" Width="{StaticResource colWidth2}" Background="White" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal">
-                        <Label Name="lbltrimMaxCurrent" Content="Максимальное ток, mA:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <Label Name="lbltrimMaxCurrent" Content="Обратная связь верхнего положения в движении, 0.1В::" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbtrimMaxCurrent" Height="23" Width="{StaticResource colWidth2}" Background="White" />
                     </StackPanel>
                 </StackPanel>
@@ -216,6 +220,43 @@
                         <TextBox x:Name="tbAcc2MaxPos" Height="23" Width="{StaticResource colWidth2}" Background="White"
 							/>
                     </StackPanel>
+                    <!--Зависимость ограничения рекуперации от скорости-->
+                    <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}"  Margin="0, 10, 0, 0">
+                        <Label Name="lblTorqueTable" Content="Зависимость крутящего момента от положения ручки" FontWeight="Bold" Height="28" />
+                    </StackPanel>
+                    <!--Таблица тяга от положение ручки-->
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Label Content="Сигнал ручки, 0.1В" Style="{StaticResource lbCap}" Width="120" />
+                        <Label Content="Крутящий момент, %" Style="{StaticResource lbCap}" Grid.Row="1" />
+
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBox x:Name="tbThHandle1" Width="{StaticResource cellW}" Background="White"/>
+                            <TextBox x:Name="tbThHandle2" Width="{StaticResource cellW}" Background="White"/>
+                            <TextBox x:Name="tbThHandle3" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbThHandle4" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbThHandle5" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbThHandle6" Width="{StaticResource cellW}" Background="White" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1">
+                            <TextBox x:Name="tbDemandT1" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbDemandT2" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbDemandT3" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbDemandT4" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbDemandT5" Width="{StaticResource cellW}" Background="White" />
+                            <TextBox x:Name="tbDemandT6" Width="{StaticResource cellW}" Background="White" />
+                        </StackPanel>
+                    </Grid>
                     
                 </StackPanel>
             </TabItem>

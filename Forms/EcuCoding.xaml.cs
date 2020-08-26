@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace BoadService
+namespace MFService
 {
     public enum ReadDataResult_e
     {
@@ -125,22 +125,23 @@ namespace BoadService
 
 			EcuModelId ecuModel = EcuModelId.none;
 
-			if (DiagAddress >= (byte)EcuDiagAddress.GENERAL_ECU_DIAG_ID && DiagAddress < (byte)EcuDiagAddress.MAIN_ECU_DIAG_ID)
+			if (DiagAddress >= (byte)EcuDiagAddress.GENERAL_ECU_DIAG_ID && DiagAddress < (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID)
 			{
 				ecuModel = EcuModelId.gEcu;
+			}
+			else if (DiagAddress >= (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID && DiagAddress < (byte)EcuDiagAddress.MAIN_ECU_DIAG_ID)
+			{
+				ecuModel = EcuModelId.dEcu;
 			}
 			else if(DiagAddress >= (byte)EcuDiagAddress.MAIN_ECU_DIAG_ID && DiagAddress < (byte)EcuDiagAddress.BATTERY_ECU_ID)
 			{
 				ecuModel = EcuModelId.mEcu;
 			}
-			else if(DiagAddress >= (byte)EcuDiagAddress.BATTERY_ECU_ID && DiagAddress < (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID)
+			else if(DiagAddress >= (byte)EcuDiagAddress.BATTERY_ECU_ID)
 			{
 				ecuModel = EcuModelId.bms;
 			}
-            else if (DiagAddress >= (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID)
-            {
-                ecuModel = EcuModelId.dEcu;
-            }
+            
 
             if (ecuModel == EcuModelId.none)
 				return;

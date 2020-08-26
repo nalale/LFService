@@ -9,10 +9,10 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Xml;
 using System.Runtime.InteropServices;
 
-namespace BoadService
+namespace MFService
 {
 	/// <summary>
 	/// Interaction logic for Mcu_ECUCoding.xaml
@@ -23,9 +23,7 @@ namespace BoadService
 
 		public General_ECUCoding()
 		{
-			InitializeComponent();
-
-			//gEcu = new General_ECU(EcuModelId.gEcu);			
+			InitializeComponent();					
 
 			gEcu = Global.EcuList.CurrentEcu as General_ECU;
 
@@ -307,12 +305,38 @@ namespace BoadService
 
 		public void Open(string path)
 		{
-
+			// Загружаем файл
+			XmlDocument doc = new XmlDocument();
+			try
+			{
+				doc.Load(path);
+				if (LoadFromXml(doc.DocumentElement))
+				{
+					StructToForm();
+				}
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show("Не удалось загрузить файл. \nОшибка: " + ex.Message);
+			}
 		}
 
 		public void Save(string path)
 		{
+			if (FormToStruct() == false)
+				return;
 
+			XmlDocument doc = new XmlDocument();
+			doc.AppendChild(ToXml(doc));
+
+
+			// Запись документа в файл
+			XmlTextWriter writer = new XmlTextWriter(path, System.Text.Encoding.UTF8);
+			writer.Formatting = Formatting.Indented;
+			writer.IndentChar = ' '; // задаем отступ
+			doc.WriteContentTo(writer);
+			writer.Flush();
+			writer.Close();
 		}
 
 		#endregion
@@ -321,5 +345,135 @@ namespace BoadService
 		{
 
 		}
+
+		#region XML
+
+		XmlNode ToXml(XmlDocument doc)
+		{
+			XmlElement root = doc.CreateElement("Coding");
+
+			XmlElement el;
+
+			AddXmlElement(root, "EcuClassId", ((int)CurrentEcu.ModelId).ToString());
+
+			AddXmlElement(root, "DiagnosticID", gEcu.Data.DiagnosticID.ToString());
+			AddXmlElement(root, "Index", gEcu.Data.Index.ToString());
+
+			// AnalogOutput
+			el = AddXmlElement(root, "AnalogOutput", "");
+			foreach (byte val in gEcu.Data.AnalogOutput)
+				AddXmlElement(el, "val", val.ToString());
+
+			// DigitalOutput
+			el = AddXmlElement(root, "DigitalOutput", "");
+			foreach (byte val in gEcu.Data.DigitalOutput)
+				AddXmlElement(el, "val", val.ToString());
+
+			// CurrentThreshold_A
+			el = AddXmlElement(root, "CurrentThreshold_A", "");
+			foreach (byte val in gEcu.Data.CurrentThreshold_A)
+				AddXmlElement(el, "val", val.ToString());
+
+			// tab			
+			foreach (var val in gEcu.Data.tab)
+			{
+				el = AddXmlElement(root, "tab" + val.Id1.ToString(), "");
+				AddXmlElement(el, "Id1", val.Id1.ToString());
+				AddXmlElement(el, "Id2", val.Id2.ToString());
+				AddXmlElement(el, "Ext1", val.Ext1.ToString());
+				AddXmlElement(el, "Ext2", val.Ext2.ToString());
+				AddXmlElement(el, "Direction", val.Direction.ToString());
+				AddXmlElement(el, "RepCount", val.RepCount.ToString());
+				AddXmlElement(el, "SendPeriod", val.SendPeriod.ToString());
+				AddXmlElement(el, "flags", val.flags.ToString());
+			}
+
+			AddXmlElement(root, "PowerOffDelay_ms", gEcu.Data.PowerOffDelay_ms.ToString());
+			AddXmlElement(root, "KeyOffTime_ms", gEcu.Data.KeyOffTime_ms.ToString());
+			AddXmlElement(root, "IsPowerManger", gEcu.IsPowerManger.ToString());
+			AddXmlElement(root, "PullUp_IN1", gEcu.PullUp_IN1.ToString());
+			AddXmlElement(root, "PullUp_IN2", gEcu.PullUp_IN2.ToString());
+			AddXmlElement(root, "PullUp_IN3", gEcu.PullUp_IN3.ToString());
+			AddXmlElement(root, "PullUp_IN4", gEcu.PullUp_IN4.ToString());
+			return root;
+		}
+
+		bool LoadFromXml(XmlNode node)
+		{
+			foreach (XmlNode n in node.ChildNodes)
+			{
+				if (n.Name == "EcuClassId")
+				{
+					EcuModelId cid = (EcuModelId)Convert.ToInt32(n.InnerText);
+					if (cid != CurrentEcu.ModelId)
+					{
+						MessageBox.Show("Файл кодировок предназначен для ЭБУ класса \"" + cid.ToString() + "\".");
+						return false;
+					}
+				}
+				else if (n.Name == "DiagnosticID")
+					gEcu.Data.DiagnosticID = (byte)Convert.ToByte(n.InnerText);				
+				else if (n.Name == "Index")
+					gEcu.Data.Index = Convert.ToByte(n.InnerText);
+				else if (n.Name == "AnalogOutput")
+				{
+					int i = 0;
+					foreach (XmlNode val in n.ChildNodes)
+					{
+						if (i < General_ECU.AN_OUT_COUNT)
+							gEcu.Data.AnalogOutput[i] = Convert.ToByte(val.InnerText);
+						i++;
+					}
+				}
+				else if (n.Name == "DigitalOutput")
+				{
+					int i = 0;
+					foreach (XmlNode val in n.ChildNodes)
+					{
+						if (i < General_ECU.DIG_OUT_COUNT)
+							gEcu.Data.DigitalOutput[i] = Convert.ToByte(val.InnerText);
+						i++;
+					}
+				}
+				else if (n.Name == "CurrentThreshold_A")
+				{
+					int i = 0;
+					foreach (XmlNode val in n.ChildNodes)
+					{
+						if (i < General_ECU.AN_OUT_COUNT)
+							gEcu.Data.CurrentThreshold_A[i] = Convert.ToByte(val.InnerText);
+						i++;
+					}
+				}
+				else if (n.Name == "IsPowerManger")
+					gEcu.IsPowerManger = Convert.ToBoolean(n.InnerText);
+				else if (n.Name == "PowerOffDelay_ms")
+					gEcu.Data.PowerOffDelay_ms = Convert.ToUInt16(n.InnerText);
+				else if (n.Name == "KeyOffTime_ms")
+					gEcu.Data.KeyOffTime_ms = Convert.ToUInt16(n.InnerText);
+				else if (n.Name == "PullUp_IN1")
+					gEcu.PullUp_IN1 = Convert.ToBoolean(n.InnerText);
+				else if (n.Name == "PullUp_IN2")
+					gEcu.PullUp_IN2 = Convert.ToBoolean(n.InnerText);
+				else if (n.Name == "PullUp_IN3")
+					gEcu.PullUp_IN3 = Convert.ToBoolean(n.InnerText);
+				else if (n.Name == "PullUp_IN4")
+					gEcu.PullUp_IN4 = Convert.ToBoolean(n.InnerText);
+
+			}
+
+			return true;
+		}
+
+
+		XmlElement AddXmlElement(XmlElement root, string name, string val)
+		{
+			XmlElement el = root.OwnerDocument.CreateElement(name);
+			el.InnerText = val;
+			root.AppendChild(el);
+			return el;
+		}
+
+		#endregion
 	}
 }

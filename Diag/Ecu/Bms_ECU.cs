@@ -5,11 +5,13 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BoadService
+namespace MFService
 {
 	public class Bms_ECU : ECU
 	{
-		const int CCL_DCL_POINTS_NUM = 6;
+        Diag.A_Service_ReadDataByIdentifier _diagSrv;
+
+        const int CCL_DCL_POINTS_NUM = 6;
 		// Количество строк в том же самом
 		const int CCL_DCL_LINES_NUM = 3;
         
@@ -46,11 +48,12 @@ namespace BoadService
 		/// <summary>
 		/// Выключен. Работает только диагностический протокол.
 		/// </summary>
-		public bool Offline { get { return (Data.flags & 0x20) != 0; } set { Data.flags = value ? (byte)(Data.flags | 0x20) : (byte)(Data.flags & ~0x20); } }
+		public bool TestMode { get { return (Data.flags & 0x20) != 0; } set { Data.flags = value ? (byte)(Data.flags | 0x20) : (byte)(Data.flags & ~0x20); } }
 		/// <summary>
 		/// Выключен. Работает только диагностический протокол.
 		/// </summary>
 		public bool IsPowerManager { get { return (Data.flags & 0x40) != 0; } set { Data.flags = value ? (byte)(Data.flags | 0x40) : (byte)(Data.flags & ~0x40); } }
+		public bool HaveCurrentSensor { get { return (Data.flags & 0x80) != 0; } set { Data.flags = value ? (byte)(Data.flags | 0x80) : (byte)(Data.flags & ~0x80); } }
 
 		public Bms_ECU(EcuModelId modelId, byte address)
 			: base(modelId, address)
@@ -61,7 +64,9 @@ namespace BoadService
 			Data.TemperatureCCLpoint = new short[Bms_ECU.TemperatureArrayLen];
             Data.OCVpoint = new short[Bms_ECU.OCVArrayLen];
 
-			EcuAddress = address;
+            _diagSrv = new Diag.A_Service_ReadDataByIdentifier();
+
+            EcuAddress = address;
 			SetDiagData();
 		}
 
@@ -119,7 +124,8 @@ namespace BoadService
 
             public short PowerOffDelay_ms;
             public short KeyOffTime_ms;
-            public short addition_5;
+			public byte ModulesInAssembly;
+			public byte addition_5;
             public short addition_6;
             public short addition_7;
 
@@ -137,58 +143,70 @@ namespace BoadService
 
         private void SetDiagData()
 		{
-            _diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didEcuInfo, "Информация ECU", 1, true, 4, null));
+            _diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didEcuInfo, "ECU: Информация", 1, true, 4, Converter_EcuInformation));
             _diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didDateTime, "Время системы", 1, true, 1, Converter_SystemTime));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didEcuVoltage, "Напряжение питания ECU", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didEcuVoltage, "ECU: Напряжение питания", 0.1, true, 1));
 			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didPowerManagmentState, "Режим управления питанием", 1, true, 1, PowerManagerStateToString));//
 			// Параметры ECU
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didVoltageSensor1, "Напряжение датчика тока 1", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didVoltageSensor2, "Напряжение датчика тока 2", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didVoltageSensor3, "Датчик напряжения 1", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didVoltageSensor4, "Датчик напряжение 2", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didVoltageSensor1, "ECU: Напряжение датчика тока 1", 1, true, 1));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didVoltageSensor2, "ECU: Напряжение датчика тока 2", 1, true, 1));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didVoltageSensor3, "ECU: Датчик напряжения 1", 1, true, 1));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didVoltageSensor4, "ECU: Датчик напряжение 2", 1, true, 1));
 
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModMachineState, "Режим работы блока", 1, true, 1, Converter_EcuState));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModMachineSubState, "Подрежим работы блока", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didCellsVoltages, "Напряжение ячеек", 1, true, 24, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModuleTemperatures, "Датчики температуры", 1, true, 4, null));			
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModMaxCellVoltage, "Макс напряжение ячейки модуля", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModMinCellVoltage, "Мин напряжение ячейки модуля", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModMaxTemperature, "Макс температура модуля", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModMinTemperature, "Мин температура модуля", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModTotalVoltage, "Напряжение модуля", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModDischargeCellsFlag, "Флаги балансировки", 1, true, 1, Converter_DischargeMask));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModInOutState, "Порты ввода вывода", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModMachineState, "ECU: Режим работы", 1, true, 1, Converter_EcuState));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModMachineSubState, "ECU: Подрежим работы блока", 1, true, 1));			
+            _diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModInOutState, "ECU: Порты ввода вывода", 1, true, 1, Converter_DischargeMask));
 
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatMaxCellVoltage, "Макс напряжение ячейки батареи", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatMinCellVoltage, "Мин напряжение ячейки батареи", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatMaxTemperature, "Макс температура батареи", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatMinTemperature, "Мин температура батареи", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatMaxVoltage, "Макс напряжение модулей батареи", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatMinVoltage, "Мин напряжение модулей батареи", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatTotalCurrent, "Ток батареи", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatTotalVoltage, "Напряжение батареи", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatStateOfCharge, "Состояние заряда батареи", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatEnergy, "Энергия батареи", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatCCL, "Максимальный ток заряда батареи", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatDCL, "Максимальный ток разряда батареи", 1, true, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didCellsVoltages, "Модуль: Напряжение ячеек", 0.001, true, 24, null));
+            _diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModuleTemperatures, "Модуль: Датчики температуры", 1, true, 4, null));
+            _diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModMaxCellVoltage, "Модуль: Макс напряжение ячейки", 0.001, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModMinCellVoltage, "Модуль: Мин напряжение ячейки", 0.001, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModMaxTemperature, "Модуль: Макс температура", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModMinTemperature, "Модуль: Мин температура", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModTotalVoltage, "Модуль: Напряжение", 0.1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModTotalCurrent, "Модуль: Ток", 0.1, true, 1));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModDischargeCellsFlag, "Модуль: Флаги балансировки", 1, true, 1, Converter_DischargeMask));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModStateOfCharge, "Модуль: Состояние заряда", 1, true, 1));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModEnergy, "Модуль: Текущая энергия", 0.0002778, true, 1));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModTotalEnergy, "Модуль: Полная энергия", 0.0002778, true, 1));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didModCurrentCycleEnergy, "Модуль: Энергия от начала цикла", 0.0002778, true, 1));
 
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstCellMaxVoltage, "Макс напряжение ячейки системы", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstCellMinVoltage, "Мин напряжение ячейки системы", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstMaxTemperature, "Макс температура системы", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstMinTemperature, "Мин температура системы", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstMaxVoltage, "Макс напряжение батарей системы", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstMinVoltage, "Мин напряжение батарей системы", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstMaxCurrent, "Макс ток батарей системы", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstMinCurrent, "Мин ток батарей системы", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstTotalCurrent, "Ток системы", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstTotalVoltage, "Напряжение системы", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstStateOfCharge, "Состояние заряда системы", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstEnergy, "Энергия системы", 1, true, 4, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstCCL, "Максимальный ток заряда системы", 1, true, 1, null));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstDCL, "Максимальный ток разряда системы", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatMaxCellVoltage, "Pack: Макс напряжение ячейки", 0.001, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatMinCellVoltage, "Pack: Мин напряжение ячейки", 0.001, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatMaxTemperature, "Pack: Макс температура", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatMinTemperature, "Pack: Мин температура", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatMaxVoltage, "Pack: Макс напряжение модулей", 0.1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatMinVoltage, "Pack: Мин напряжение модулей", 0.1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatTotalCurrent, "Pack: Ток", 0.1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatTotalVoltage, "Pack: Напряжение", 0.1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatStateOfCharge, "Pack: Состояние заряда", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatEnergy, "Pack: Энергия, Ah", 0.0002778, true, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatTotalEnergy, "Pack: Полная емкость, Ah", 0.0002778, true, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatCCL, "Pack: Максимальный ток заряда", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatDCL, "Pack: Максимальный ток разряда", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatLastPrechargeDuration, "Pack: Продолжительность предзаряда, мс", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatLastPrechargeCurrent, "Pack: Максимальный ток предзаряда, А", 0.1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didBatModulesOnlineFlag, "Pack: Флаги модулей в сети", 1, true, 1, Converter_DischargeMask));
 
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didFaults_Actual, "Активные ошибки", 1, true, (byte)BmsFaultCodes.dtc_Count, Converter_Faults));
-			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didFaults_History, "История ошибки", 1, true, (byte)BmsFaultCodes.dtc_Count, Converter_Faults));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstCellMaxVoltage, "BMS: Макс напряжение ячейки", 0.001, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstCellMinVoltage, "BMS: Мин напряжение ячейки", 0.001, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstMaxTemperature, "BMS: Макс температура", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstMinTemperature, "BMS: Мин температура", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstMaxVoltage, "BMS: Макс напряжение батарей", 0.1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstMinVoltage, "BMS: Мин напряжение батарей", 0.1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstMaxCurrent, "BMS: Макс ток батарей", 0.1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstMinCurrent, "BMS: Мин ток батарей", 0.1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstTotalCurrent, "BMS: Ток", 0.1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstTotalVoltage, "BMS: Напряжение", 0.1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstStateOfCharge, "BMS: Состояние заряда", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstEnergy, "BMS: Энергия, Ah", 0.000278, true, 4, null));
+            _diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMsgTotalEnergy, "BMS: Полная емкость, Ah", 0.000278, true, 4, null));
+            _diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstCCL, "BMS: Максимальный ток заряда", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstDCL, "BMS: Максимальный ток разряда", 1, true, 1, null));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didMstPacksOnlineFlag, "BMS: Флаги батарей в сети", 1, true, 1, Converter_DischargeMask));
+
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didFaults_Actual, "ECU: Активные ошибки", 1, true, (byte)BmsFaultCodes.dtc_Count, Converter_Faults));
+			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didFaults_History, "ECU: История ошибки", 1, true, (byte)BmsFaultCodes.dtc_Count, Converter_Faults));
 			_diagData.Add(new DiagnosticData((ushort)BmsObjectsIndex_e.didFaults_FreezeFrame, "Стоп кадры", 1, true, (byte)BmsFaultCodes.dtc_Count, Converter_Faults));
 		}
 
@@ -197,7 +215,7 @@ namespace BoadService
 		public override List<DiagnosticData> GetDiagnosticSets()
 		{
 			foreach (DiagnosticData dd in _diagData)
-				dd.Value.Clear();
+				dd.ClearValues();
 
 			return _diagData;
 		}
@@ -209,14 +227,30 @@ namespace BoadService
 
 		#endregion
 
-		public override async Task<List < ResponseData_ReadDataByIdentifier>> GetEcuInfo()
+		public override async Task<List<string>> GetEcuInfo()
 		{
-			return await Global.diag.ReadDataByIDs((byte)EcuAddress, new byte[] { (byte)BmsObjectsIndex_e.didEcuInfo });			
-		}
+            DiagnosticData dv = this.GetDiagnosticSets().Find((diag) => diag.DataID == (int)BmsObjectsIndex_e.didEcuInfo);
 
-        public override async Task<List<ResponseData_ReadDataByIdentifier>> GetEcuTime()
+            if (dv == null)
+                return new List<string>();
+            
+            _diagSrv.AddRequestedDID((uint)dv.DataID);
+
+            if (await _diagSrv.RequestService(EcuAddress))
+            {
+                var lst = _diagSrv.GetResponseValue(dv.DataID);
+                foreach (int val in lst)
+                    dv.AddValue(val);
+
+                return dv.GetValue();
+            }
+            else
+                return new List<string>();
+        }
+
+        public override async Task<List<Diag.ResponseData_ReadDataByIdentifier>> GetEcuTime()
         {
-            return await Global.diag.ReadDataByIDs((byte)EcuAddress, new byte[] { (byte)BmsObjectsIndex_e.didDateTime });
+            return await Global.diag.ReadDataByIDs((byte)EcuAddress, new int[] { (byte)BmsObjectsIndex_e.didDateTime });
         }
 
         public override async Task<bool> ClearFaults()
@@ -224,10 +258,16 @@ namespace BoadService
             return await Global.diag.WriteDataByID((byte)EcuAddress, (byte)BmsObjectsIndex_e.didFaults_History, new byte[] { 0 });
         }
 
-        #region DiagConverter
-
-        string Converter_Faults(int Code)
+		public override async Task<bool> ClearFlashData()
 		{
+			return await Global.diag.WriteDataByID((byte)EcuAddress, (byte)BmsObjectsIndex_e.didFlashData, new byte[] { 0 });
+		}
+
+		#region DiagConverter
+
+		string Converter_Faults(Tuple<int, int> t)
+		{
+            int Code = t.Item1;
 			BmsFaultCodes fault_id = (BmsFaultCodes)((Code & 0xff00) >> 8);
 			int fault_cat = Code & 0xff;
 
@@ -237,13 +277,19 @@ namespace BoadService
 			return fault_desc + ", " + cat_desc;
 		}
 
-		string Converter_DischargeMask(int Code)
+		string Converter_DischargeMask(Tuple<int, int> t)
 		{
-			return Convert.ToString(Code, 2).PadLeft(32, '0');
+            int inputs = Convert.ToUInt16(t.Item1 & 0xFFFF);
+            int outputs = Convert.ToUInt16(t.Item1 >> 16 & 0xFFFF);
+
+            string in_s = Convert.ToString(inputs, 2).PadLeft(16, '0');
+            string out_s = Convert.ToString(outputs, 2).PadLeft(16, '0');
+            return out_s + " " + in_s;
 		}
 
-        string Converter_SystemTime(int Code)
+        string Converter_SystemTime(Tuple<int, int> t)
         {
+            int Code = t.Item1;
             // Точка отсчета 01.01.2000
             DateTime _startTime = new DateTime(2000, 1, 1);
             DateTime _actualDate = _startTime.AddSeconds(Code);                
@@ -251,9 +297,10 @@ namespace BoadService
             return _actualDate.ToString();
         }
 
-		string PowerManagerStateToString(int Code)
+		string PowerManagerStateToString(Tuple<int, int> t)
 		{
 			string fault_desc;
+            int Code = t.Item1;
 			switch (Code)
 			{
 				case 0:
@@ -276,8 +323,9 @@ namespace BoadService
 			return fault_desc;
 		}
 
-		string Converter_EcuState(int Code)
+		string Converter_EcuState(Tuple<int, int> t)
 		{
+            int Code = t.Item1;
 			switch (Code)
 			{
 				case 0:
@@ -297,6 +345,10 @@ namespace BoadService
 			}
 		}
 
+        new string Converter_EcuInformation(Tuple<int, int> t)
+        {
+            return base.Converter_EcuInformation(t);
+        }
 		#endregion
 
 		string FaultCodeToString(BmsFaultCodes Code)
@@ -361,7 +413,7 @@ namespace BoadService
                 case BmsFaultCodes.dtc_CAN_Bms:
                 case BmsFaultCodes.dtc_CAN_generalVcu:
                 case BmsFaultCodes.dtc_CAN_mainVcu:
-                    fault_desc = "Ошибка CAN";
+                    fault_desc = "CAN: Таймаут команды управления";
                     break;
 
 				case BmsFaultCodes.dtc_CAN_PM:
@@ -391,67 +443,80 @@ namespace BoadService
 		didMachineSubState,
 		didInOutState,
 		didEcuVoltage,
-		didPowerManagmentState,
+		didPowerManagmentState,		
 
 		didVoltageSensor1 = 10,
-        didVoltageSensor2,
-        didVoltageSensor3,
-        didVoltageSensor4,
-        didVoltageSensor5,
-        didVoltageSensor6,
-        didVoltageSensor7,
-        didVoltageSensor8,
+		didVoltageSensor2,
+		didVoltageSensor3,
+		didVoltageSensor4,
+		didVoltageSensor5,
+		didVoltageSensor6,
+		didVoltageSensor7,
+		didVoltageSensor8,
 
-        // Параметры модуля батареи
-        didModMachineState,
-        didModMachineSubState,
-        didCellsVoltages,
-        didModuleTemperatures,
+		// Параметры модуля батареи
+		didModMachineState = 30,
+		didModMachineSubState,
+		didCellsVoltages,
+		didModuleTemperatures,
+		didModTotalVoltage,
+		didModMaxTemperature,
+		didModMinTemperature,
+		didModMaxCellVoltage,
+		didModMinCellVoltage,
+		didModDischargeCellsFlag,
+		didModInOutState,
+		didModStateOfCharge,
+		didModEnergy,
+		didModTotalEnergy,
+		didModTotalCurrent,
+		didModCurrentCycleEnergy,
+		
 
-        didModTotalVoltage,
-        didModMaxTemperature,
-        didModMinTemperature,
-        didModMaxCellVoltage,
-        didModMinCellVoltage,
-        didModDischargeCellsFlag,
-        didModInOutState,
+		// Battery parameters
+		didBatTotalCurrent = 50,
+		didBatTotalVoltage,
+		didBatMaxVoltage,
+		didBatMinVoltage,
+		didBatMaxTemperature,
+		didBatMinTemperature,
+		didBatMaxCellVoltage,
+		didBatMinCellVoltage,
+		didBatStateOfCharge,
+		didBatEnergy,
+		didBatTotalEnergy,
+		didBatCCL,
+		didBatDCL,
+		didBatLastPrechargeDuration,
+		didBatLastPrechargeCurrent,
+		didBatModulesOnlineFlag,
 
-        // Параметры батареи
-        didBatTotalCurrent,
-        didBatTotalVoltage,
-        didBatMaxVoltage,
-        didBatMinVoltage,
-        didBatMaxTemperature,
-        didBatMinTemperature,
-        didBatMaxCellVoltage,
-        didBatMinCellVoltage,
-        didBatStateOfCharge,
-        didBatEnergy,
-        didBatCCL,
-        didBatDCL,
+		// Master Parameters
+		didMstTotalCurrent = 70,
+		didMstTotalVoltage,
+		didMstMaxCurrent,
+		didMstMinCurrent,
+		didMstMaxVoltage,
+		didMstMinVoltage,
+		didMstMaxTemperature,
+		didMstMinTemperature,
+		didMstCellMaxVoltage,
+		didMstCellMinVoltage,
+		didMstStateOfCharge,
+		didMstEnergy,
+		didMsgTotalEnergy,
+		didMstCCL,
+		didMstDCL,
+		didMstPacksOnlineFlag,
 
-        // Параметры мастера
-        didMstTotalCurrent,
-        didMstTotalVoltage,
-        didMstMaxCurrent,
-        didMstMinCurrent,
-        didMstMaxVoltage,
-        didMstMinVoltage,
-        didMstMaxTemperature,
-        didMstMinTemperature,
-        didMstCellMaxVoltage,
-        didMstCellMinVoltage,
-        didMstStateOfCharge,
-        didMstEnergy,
-        didMstCCL,
-        didMstDCL,
+		// Диагностика ошибок
+		didFaults_Actual = 100,
+		didFaults_History,
 
-        // Диагностика ошибок
-        didFaults_Actual = 100,
-        didFaults_History,
+		didFaults_FreezeFrame,
 
-        didFaults_FreezeFrame,
-    };
+		didFlashData = 105,
+	};
 
     public enum BmsFaultCodes
     {

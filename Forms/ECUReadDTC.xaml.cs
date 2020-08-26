@@ -5,7 +5,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace BoadService
+namespace MFService
 {
 	/// <summary>
 	/// Логика взаимодействия для ECUReadDTC.xaml
@@ -13,7 +13,7 @@ namespace BoadService
 	public partial class ECUReadDTC : UserControl
 	{
 
-		A_Service_ReadDataByIdentifier DiagSrv;
+        Diag.A_Service_ReadDataByIdentifier DiagSrv;
 
 		public ECUReadDTC()
 		{
@@ -52,7 +52,7 @@ namespace BoadService
 			if (isSet)
 				return;
 
-			DiagSrv = new A_Service_ReadDataByIdentifier();
+			DiagSrv = new Diag.A_Service_ReadDataByIdentifier();
 
 			isSet = true;
 
@@ -142,7 +142,7 @@ namespace BoadService
 			foreach (ECU curEcu in Global.EcuList.Items)
 			{
 				byte id = (byte)curEcu.GetFrzFramesSet().DataID;
-				List<ResponseData_ReadDataByIdentifier> Response = await Global.diag.ReadDataByIDs(curEcu.Address, new byte[] { id });
+				List<Diag.ResponseData_ReadDataByIdentifier> Response = await Global.diag.ReadDataByIDs(curEcu.Address, new int[] { id });
 
 				if (Response[0].Result != 0)
 				{
@@ -222,12 +222,12 @@ namespace BoadService
 
 		void ShowDTC(List<EcuDTCList> res)
 		{
-			const string indent1 = "      ";
-			const string indent2 = indent1 + indent1;
+			//const string indent1 = "      ";
+			//const string indent2 = indent1 + indent1;
 
 
-			string s = "";
-			TextBox ht;
+			//string s = "";
+			//TextBox ht;
 			//List<HistoryText> lines = new List<HistoryText>();
 			//bool isDtcExist = false;
 

@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Runtime.InteropServices;
 
-namespace BoadService
+namespace MFService
 {
 	/// <summary>
 	/// Interaction logic for Mcu_ECUCoding.xaml
@@ -59,7 +59,9 @@ namespace BoadService
 			cbSensorType.Items.Add("cstHASS_200");
 			cbSensorType.Items.Add("cstHASS_300");
 			cbSensorType.Items.Add("cstHASS_400");
-			Tools.SetComboItem(cbSensorType, 2);
+            cbSensorType.Items.Add("cstNone");           
+
+            Tools.SetComboItem(cbSensorType, 6);
 
 			cbSensorDirection.Items.Add("Прямое");
 			cbSensorDirection.Items.Add("Обратное");
@@ -169,11 +171,13 @@ namespace BoadService
 			bms.CheckInterlock = checkInterlock.IsChecked.Value;
 			bms.IsTimeServer = checkTimeServer.IsChecked.Value;
 			bms.VcuControled = checkVcuControled.IsChecked.Value;
-			bms.Offline = checkOffline.IsChecked.Value;
-			bms.IsPowerManager = checkDebug.IsChecked.Value;         
-			
-			bms.Data.PowerOffDelay_ms = Convert.ToInt16(tbPowerOffDelay.Text);
+			bms.TestMode = checkOffline.IsChecked.Value;
+			bms.IsPowerManager = checkDebug.IsChecked.Value;           
+
+
+            bms.Data.PowerOffDelay_ms = Convert.ToInt16(tbPowerOffDelay.Text);
 			bms.Data.KeyOffTime_ms = Convert.ToInt16(tbIgnitionReact.Text);
+            bms.Data.ModulesInAssembly = Convert.ToByte(tbModulesInAssembly.Text);
 
 			return true;
 		}
@@ -276,12 +280,14 @@ namespace BoadService
 			checkInterlock.IsChecked = bms.CheckInterlock;
 			checkTimeServer.IsChecked = bms.IsTimeServer;
 			checkVcuControled.IsChecked = bms.VcuControled;
-			checkOffline.IsChecked = bms.Offline;
-			checkDebug.IsChecked = bms.IsPowerManager;
+			checkOffline.IsChecked = bms.TestMode;
+			checkDebug.IsChecked = bms.IsPowerManager;            
 
-			tbPowerOffDelay.Text = bms.Data.PowerOffDelay_ms.ToString();
+
+            tbPowerOffDelay.Text = bms.Data.PowerOffDelay_ms.ToString();
 			tbIgnitionReact.Text = bms.Data.KeyOffTime_ms.ToString();
-		}
+            tbModulesInAssembly.Text = bms.Data.ModulesInAssembly.ToString();
+        }
 
 		#endregion
 
@@ -310,11 +316,11 @@ namespace BoadService
                     //byte[] data = await Global.diag.ReadDataByID((byte)Global.EcuList.CurrentEcu.Address, (byte)BmsObjectsIndex_e.didDateTime);
                     //UInt32 _boardTime_s = BitConverter.ToUInt32(data, 0);
 
-                    List<ResponseData_ReadDataByIdentifier> response = await CurrentEcu.GetEcuTime();
+                    List<Diag.ResponseData_ReadDataByIdentifier> response = await CurrentEcu.GetEcuTime();
 
                     if (response.Count > 0)
                     {
-                        ResponseData_ReadDataByIdentifier it = response[0];
+                        Diag.ResponseData_ReadDataByIdentifier it = response[0];
                         // Найти в списке диагностических значений нужный 
                         DiagnosticData dv = Global.EcuList.CurrentEcu.GetDiagnosticSets().Find((diag) => diag.DataID == it.DID);
                         // Если ЭБУ поддерживает запрашиваемый DID
@@ -436,13 +442,14 @@ namespace BoadService
             AddXmlElement(root, "CheckInterlock", bms.CheckInterlock.ToString());
             AddXmlElement(root, "IsTimeServer", bms.IsTimeServer.ToString());
             AddXmlElement(root, "VcuControled", bms.VcuControled.ToString());
-            AddXmlElement(root, "Offline", bms.Offline.ToString());
-            AddXmlElement(root, "IsPowerManager", bms.IsPowerManager.ToString());
+            AddXmlElement(root, "Offline", bms.TestMode.ToString());
+            AddXmlElement(root, "IsPowerManager", bms.IsPowerManager.ToString());            
 
             AddXmlElement(root, "BaseID", bms.Data.BaseID.ToString());
             AddXmlElement(root, "CurrentSensType", bms.Data.CurrentSensType.ToString());
             AddXmlElement(root, "CurrentSensDirection", bms.Data.CurrentSensDirection.ToString());
-            
+            AddXmlElement(root, "HaveCurrentSensor", bms.HaveCurrentSensor.ToString());
+
             AddXmlElement(root, "MaxVoltageDisbalanceS", bms.Data.MaxVoltageDisbalanceS.ToString());
             AddXmlElement(root, "TotalCapacity", bms.Data.TotalCapacity.ToString());
             AddXmlElement(root, "MaxVoltageDisbalanceP", bms.Data.MaxVoltageDisbalanceP.ToString());
@@ -484,8 +491,10 @@ namespace BoadService
 
 			AddXmlElement(root, "PowerOffDelay_ms", bms.Data.PowerOffDelay_ms.ToString());
 			AddXmlElement(root, "KeyOffTime_ms", bms.Data.KeyOffTime_ms.ToString());
+            AddXmlElement(root, "ModulesInAssembly", bms.Data.ModulesInAssembly.ToString());            
 
-			return root;
+
+            return root;
         }
 
         bool LoadFromXml(XmlNode node)
@@ -520,7 +529,7 @@ namespace BoadService
                 else if (n.Name == "VcuControled")
                     bms.VcuControled = Convert.ToBoolean(n.InnerText);
                 else if (n.Name == "Offline")
-                    bms.Offline = Convert.ToBoolean(n.InnerText);
+                    bms.TestMode = Convert.ToBoolean(n.InnerText);
                 else if (n.Name == "IsPowerManager")
                     bms.IsPowerManager = Convert.ToBoolean(n.InnerText);
 
@@ -531,6 +540,8 @@ namespace BoadService
                     bms.Data.CurrentSensType = Convert.ToByte(n.InnerText);
                 else if (n.Name == "CurrentSensDirection")
                     bms.Data.CurrentSensDirection = Convert.ToByte(n.InnerText);
+                else if (n.Name == "HaveCurrentSensor")
+                    bms.HaveCurrentSensor = Convert.ToBoolean(n.InnerText);
                 else if (n.Name == "MaxVoltageDisbalanceS")
                     bms.Data.MaxVoltageDisbalanceS = Convert.ToByte(n.InnerText);
                 else if (n.Name == "TotalCapacity")
@@ -610,11 +621,14 @@ namespace BoadService
                 }
 
 				else if (n.Name == "PowerOffDelay_ms")
-					bms.Data.PowerOffDelay_ms = Convert.ToByte(n.InnerText);
+					bms.Data.PowerOffDelay_ms = Convert.ToInt16(n.InnerText);
 				else if (n.Name == "KeyOffTime_ms")
-					bms.Data.KeyOffTime_ms = Convert.ToByte(n.InnerText);
+					bms.Data.KeyOffTime_ms = Convert.ToInt16(n.InnerText);
+                else if (n.Name == "ModulesInAssembly")
+                    bms.Data.ModulesInAssembly = Convert.ToByte(n.InnerText); 
 
-			}
+
+            }
 
             return true;
         }

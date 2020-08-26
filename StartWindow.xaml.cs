@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace BoadService
+namespace MFService
 {
 	/// <summary>
 	/// Interaction logic for StartWindow.xaml
@@ -36,19 +36,11 @@ namespace BoadService
 		private void StartWindow_Loaded(object sender, RoutedEventArgs e)
 		{
             _timer = new Timer(1000);
-
-            
-            //Global.EcuList.Items.Add(EcuList.CreateEcu(1));
-            //comboECU.ItemsSource = Global.EcuList.Items.Select((ecu) => { return new StringBuilder(ecu.Model + ecu.Address.ToString()).ToString(); });
-            //if (comboECU.Items.Count > 0)
-            //	comboECU.SelectedIndex = 0;
         }
 
         private void TimerFunc(object sender, ElapsedEventArgs e)
         {
-
-            Dispatcher.BeginInvoke( new Action((SetDateTime)));
-            
+            Dispatcher.BeginInvoke( new Action((SetDateTime)));            
         }
 
 		private void btnCoding_Click(object sender, RoutedEventArgs e)
@@ -98,8 +90,7 @@ namespace BoadService
 				_ecuDiagAddress = Global.EcuList.CurrentEcu.Address;
                 SetEcuInfo();
 
-                _timer.Elapsed += TimerFunc;
-                //_timer.Start();
+                _timer.Elapsed += TimerFunc;                
             }
             else
             {
@@ -111,53 +102,24 @@ namespace BoadService
 
 		private async void SetEcuInfo()
 		{
-			List < ResponseData_ReadDataByIdentifier > response = await Global.EcuList.CurrentEcu.GetEcuInfo();
+			List <string> info = await Global.EcuList.CurrentEcu.GetEcuInfo();
 
-			if(response.Count > 0)
+			if(info.Count == 4)
 			{
-				ResponseData_ReadDataByIdentifier it = response[0];
-                // Найти в списке диагностических значений нужный 
-                DiagnosticData dv = Global.EcuList.CurrentEcu.GetDiagnosticSets().Find((diag) => diag.DataID == it.DID);
-                // Если ЭБУ поддерживает запрашиваемый DID
-                if (dv == null)
-                    return;
-
-                if (it.DV.Count == 0)
-                    return;
-
-                for (int i = 0; i < it.DV.Count / 4; i++)
-                    dv.AddValue(BitConverter.ToInt32(it.DV.ToArray(), i * 4));
-
-                if (Convert.ToByte(dv.Value[0]) >= (byte)EcuDiagAddress.GENERAL_ECU_DIAG_ID && Convert.ToByte(dv.Value[0]) < (byte)EcuDiagAddress.MAIN_ECU_DIAG_ID)
-                {
-                    tbModel.Text = "General ECU";
-                }
-                else if (Convert.ToByte(dv.Value[0]) >= (byte)EcuDiagAddress.MAIN_ECU_DIAG_ID && Convert.ToByte(dv.Value[0]) < (byte)EcuDiagAddress.BATTERY_ECU_ID)
-                {
-                    tbModel.Text = "Main ECU";
-                }
-                else if (Convert.ToByte(dv.Value[0]) >= (byte)EcuDiagAddress.BATTERY_ECU_ID)
-                {
-                    tbModel.Text = "BMS ECU";
-                }
-
-                if(Convert.ToByte(dv.Value[1]) == 1)
-                    tbHW.Text = "BMS COMBI";
-                else if(Convert.ToByte(dv.Value[1]) == 2)
-                    tbHW.Text = "MARINE ECU";
-
-                tbVersion.Text = dv.Value[2];
-                tbHvVersion.Text = dv.Value[3]; 
+                tbModel.Text = info[0];
+                tbHW.Text = info[1];
+                tbVersion.Text = info[2];
+                tbHvVersion.Text = info[3];
             }
 		}
 
         private async void SetDateTime()
         {
-            List<ResponseData_ReadDataByIdentifier> response = await Global.EcuList.CurrentEcu.GetEcuTime();
+            List<Diag.ResponseData_ReadDataByIdentifier> response = await Global.EcuList.CurrentEcu.GetEcuTime();
 
             if (response.Count > 0)
             {
-                ResponseData_ReadDataByIdentifier it = response[0];
+                Diag.ResponseData_ReadDataByIdentifier it = response[0];
                 // Найти в списке диагностических значений нужный 
                 DiagnosticData dv = Global.EcuList.CurrentEcu.GetDiagnosticSets().Find((diag) => diag.DataID == it.DID);
                 // Если ЭБУ поддерживает запрашиваемый DID
@@ -172,14 +134,12 @@ namespace BoadService
             }
         }
 
-		async public void FindEcuList()
+		public void FindEcuList()
 		{
-			List<byte> res = await Global.diag.ReadDiagID();
-
 			comboECU.ItemsSource = null;
 			Global.EcuList.Items.Clear();
 
-			foreach (byte i in res)
+			foreach (byte i in Global.diag.ReadDiagID())
 			{
 				if (!Global.EcuList.Items.Exists((ecu) => (ecu.Address == i)) && (i > 0))
 				{
@@ -188,6 +148,7 @@ namespace BoadService
 			}
 
 			comboECU.ItemsSource = Global.EcuList.Items.Select((ecu) => { return new StringBuilder(Enum.GetName(typeof(EcuModelId), ecu.ModelId) + "\t(" + ecu.Address.ToString() + ")").ToString(); });
+			
 			if (comboECU.Items.Count > 0)
 				comboECU.SelectedIndex = 0;
 		}
@@ -201,9 +162,24 @@ namespace BoadService
                 MessageBox.Show("Ошибки сброшены", "Внимание");
         }
 
+		async public void ClearEcuFlashData()
+		{
+			bool result = await Global.EcuList.CurrentEcu.ClearFlashData();
+			if (result != true)
+				MessageBox.Show("Сброс памяти невозможен", "Ошибка");
+			else
+				MessageBox.Show("Память данных очищена", "Внимание");
+		}
+
         private void btnClearFaults_Click(object sender, RoutedEventArgs e)
         {
             ClearEcuFaults();
         }
-    }
+
+		private void btnClearFlash_Click(object sender, RoutedEventArgs e)
+		{
+			ClearEcuFlashData();
+		}
+
+	}
 }

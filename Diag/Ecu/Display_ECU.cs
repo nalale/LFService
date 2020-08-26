@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BoadService
+namespace MFService
 {
 	public class Display_ECU : ECU
 	{
@@ -13,8 +13,8 @@ namespace BoadService
 
 		const int TABLE_CNT	=	6;
 
-		
-		public CodingData_t Data;
+        Diag.A_Service_ReadDataByIdentifier _diagSrv;
+        public CodingData_t Data;
         List<DiagnosticData> _diagData;
         int EcuAddress;
 
@@ -27,7 +27,9 @@ namespace BoadService
             _diagData = new List<DiagnosticData>();
             Data.MotorRpm = new short[TABLE_CNT*2];
 			Data.SoC = new short[TABLE_CNT*2];
-			Data.TrimPosition = new short[TABLE_CNT*2];			
+			Data.TrimPosition = new short[TABLE_CNT*2];
+
+            _diagSrv = new Diag.A_Service_ReadDataByIdentifier();
 
             EcuAddress = address;
             SetDiagData();
@@ -76,6 +78,7 @@ namespace BoadService
 
         private void SetDiagData()
         {
+            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didEcuInfo, "ECU: Информация", 1, true, 4, Converter_EcuInformation));
             _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didDateTime, "Время системы", 1, true, 1, Converter_SystemTime));
             _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didInOutState, "Порты ввода вывода", 1, true, 1, Converter_DischargeMask));
             _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didMainState, "Режим работы блока", 1, true, 1, Converter_EcuState));
@@ -84,14 +87,19 @@ namespace BoadService
             _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didPowerManagmentState, "Режим управления питанием", 1, true, 1, PowerManagerStateToString));
 
             _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didPwmOutState, "Выход ШИМ", 1, true, 4, null));
-            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didVoltageSensor1, "Датчик напряжения 1", 1, true, 1, null));
-            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didVoltageSensor2, "Датчик напряжения 2", 1, true, 1, null));
-            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didVoltageSensor3, "Датчик напряжения 3", 1, true, 1, null));
-            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didVoltageSensor4, "Датчик напряжения 4", 1, true, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didVoltageSensor1, "Датчик напряжения 1", 0.1, false, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didVoltageSensor2, "Датчик напряжения 2", 0.1, false, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didVoltageSensor3, "Датчик напряжения 3", 0.1, false, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didVoltageSensor4, "Датчик напряжения 4", 0.1, false, 1, null));
 
-            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didCurrentSensor1, "Датчик тока 1", 1, true, 1, null));
-            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didCurrentSensor2, "Датчик тока 2", 1, true, 1, null));
-            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didCurrentSensor3, "Датчик тока 3", 1, true, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didCurrentSensor1, "Датчик тока 1", 0.1, true, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didCurrentSensor2, "Датчик тока 2", 0.1, true, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didCurrentSensor3, "Датчик тока 3", 0.1, true, 1, null));
+
+            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didDisplayRpm, "Дисплей: Обороты", 1, false, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didDisplaySOC, "Дисплей: Уровень заряда", 1, false, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didDisplayTrim, "Дисплей: положение трим", 1, false, 1, null));
+            _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didDisplayConsumption, "Дисплей: удельная мощность", 0.1, false, 1, null));
 
             _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didFaults_Actual, "Активные ошибки", 1, true, (byte)FaultCodes.dtc_Count, Converter_Faults));
             _diagData.Add(new DiagnosticData((ushort)ObjectsIndex_e.didFaults_History, "Сохраненные ошибки", 1, true, (byte)FaultCodes.dtc_Count, Converter_Faults));
@@ -102,24 +110,46 @@ namespace BoadService
         public override List<DiagnosticData> GetDiagnosticSets()
         {
             foreach (DiagnosticData dd in _diagData)
-                dd.Value.Clear();
+                dd.ClearValues();
 
             return _diagData;
         }
-
-        public override async Task<List<ResponseData_ReadDataByIdentifier>> GetEcuInfo()
+        public override async Task<List<string>> GetEcuInfo()
         {
-            return await Global.diag.ReadDataByIDs((byte)EcuAddress, new byte[] { (byte)ObjectsIndex_e.didEcuInfo });
+            DiagnosticData dv = this.GetDiagnosticSets().Find((diag) => diag.DataID == (int)ObjectsIndex_e.didEcuInfo);
+
+            if (dv == null)
+                return new List<string>();
+
+            _diagSrv.AddRequestedDID((uint)dv.DataID);
+
+            if (await _diagSrv.RequestService(EcuAddress))
+            {
+                var lst = _diagSrv.GetResponseValue(dv.DataID);
+                foreach (int val in lst)
+                    dv.AddValue(val);
+
+                return dv.GetValue();
+            }
+            else
+                return new List<string>();
+        }
+        public override async Task<bool> ClearFaults()
+		{
+			return await Global.diag.WriteDataByID((byte)EcuAddress, (byte)ObjectsIndex_e.didFaults_History, null);
+		}
+        public override DiagnosticData GetFrzFramesSet()
+        {
+            return _diagData.Find(dd => dd.DataID == (ushort)ObjectsIndex_e.didFaults_FreezeFrame);
+        }
+        public override async Task<List<Diag.ResponseData_ReadDataByIdentifier>> GetEcuTime()
+        {
+            return await Global.diag.ReadDataByIDs((byte)EcuAddress, new int[] { (byte)ObjectsIndex_e.didDateTime });
         }
 
-		public override async Task<bool> ClearFaults()
-		{
-			return await Global.diag.WriteDataByID((byte)EcuAddress, (byte)ObjectsIndex_e.didFaults_History, new byte[] { 0 });
-		}
+        #region ObjectIndexes
 
-		#region ObjectIndexes
-
-		public enum ObjectsIndex_e
+        public enum ObjectsIndex_e
         {
             didEcuInfo = 0,
             didConfigStructIndex,
@@ -146,11 +176,18 @@ namespace BoadService
             
             didPwmOutState,
 
+            didDisplaySOC,
+            didDisplayRpm,
+            didDisplayTrim,
+            didDisplayConsumption,
+
             // Диагностика ошибок
             didFaults_Actual = 100,
             didFaults_History,
 
             didFaults_FreezeFrame,
+
+            didFlashData = 105,
 
         };
 
@@ -226,9 +263,10 @@ namespace BoadService
             return fault_desc;
         }
 
-		string PowerManagerStateToString(int Code)
+		string PowerManagerStateToString(Tuple<int, int> t)
         {
             string fault_desc;
+            int Code = t.Item1;
             switch (Code)
             {
                 case 0:
@@ -254,8 +292,10 @@ namespace BoadService
 
 		#region DiagConverter
 
-		string Converter_EcuState(int Code)
+		string Converter_EcuState(Tuple<int, int> t)
 		{
+            int Code = t.Item1;
+
 			switch (Code)
 			{
 				case 0:
@@ -273,8 +313,9 @@ namespace BoadService
 			}
 		}
 
-		string Converter_Faults(int Code)
+		string Converter_Faults(Tuple<int, int> t)
         {
+            int Code = t.Item1;
             FaultCodes fault_id = (FaultCodes)((Code & 0xff00) >> 8);
             int fault_cat = Code & 0xff;
 
@@ -284,17 +325,25 @@ namespace BoadService
             return fault_desc + ", " + cat_desc;
         }
 
-        string Converter_DischargeMask(int Code)
+        string Converter_DischargeMask(Tuple<int, int> t)
         {
+            int Code = t.Item1;
             return Convert.ToString(Code, 2).PadLeft(32, '0');
         }
 
-        string Converter_SystemTime(int Code)
+        string Converter_SystemTime(Tuple<int, int> t)
         {
-            DateTime dt = new DateTime();
-            dt.AddSeconds(Code);
+            int Code = t.Item1;
+            // Точка отсчета 01.01.2000
+            DateTime _actualDate = new DateTime(2000, 1, 1).AddSeconds(Code);
+            //DateTime _actualDate = _startTime.AddSeconds(Code);
 
-            return dt.ToString();
+            return _actualDate.ToString();
+        }
+
+        new string Converter_EcuInformation(Tuple<int, int> t)
+        {
+            return base.Converter_EcuInformation(t);
         }
 
         #endregion

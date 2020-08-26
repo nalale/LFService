@@ -11,7 +11,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace BoadService
+namespace MFService
 {
 	public static class Tools
 	{

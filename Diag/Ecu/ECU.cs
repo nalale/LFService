@@ -5,12 +5,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BoadService
+namespace MFService
 {
+	interface IEcu
+	{
+		Task<List<string>> GetEcuInfo();
+		List<DiagnosticData> GetDiagnosticSets();
+		DiagnosticData GetFrzFramesSet();
+		Task<List<Diag.ResponseData_ReadDataByIdentifier>> GetEcuTime();
+		Task<bool> ClearFaults();
+	}
 	/// <summary>
 	/// Описание параметров диагностируемого блока управления.
 	/// </summary>
-	public class ECU
+	public abstract class ECU : IEcu
 	{
 
 		public ECU(EcuModelId modelId, byte DiagAdressId)
@@ -19,36 +27,86 @@ namespace BoadService
 			Address = DiagAdressId;
 		}
 
-		virtual public List<DiagnosticData> GetDiagnosticSets()
+
+
+		abstract public List<DiagnosticData> GetDiagnosticSets();
+
+		abstract public DiagnosticData GetFrzFramesSet();
+
+		abstract public Task<List<string>> GetEcuInfo();
+
+		abstract public Task<List<Diag.ResponseData_ReadDataByIdentifier>> GetEcuTime();
+
+		abstract public Task<bool> ClearFaults();
+		virtual public async Task<bool> ClearFlashData()
 		{
-			return null;
+			return await new TaskFactory().StartNew(() => { return false; });
 		}
 
-		virtual public DiagnosticData GetFrzFramesSet()
+		public string Converter_EcuInformation(Tuple<int, int> t)
 		{
-			return null;
+			string result = "";
+			switch (t.Item2)
+			{
+				case 0:
+					{
+						if (t.Item1 >= (byte)EcuDiagAddress.GENERAL_ECU_DIAG_ID
+							&& t.Item1 < (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID)
+						{
+							result = "General ECU";
+						}
+						else if (t.Item1 >= (byte)EcuDiagAddress.DISPLAY_ECU_DIAG_ID
+							&& t.Item1 < (byte)EcuDiagAddress.MAIN_ECU_DIAG_ID)
+						{
+							result = "Display ECU";
+						}
+						else if (t.Item1 >= (byte)EcuDiagAddress.MAIN_ECU_DIAG_ID
+							&& t.Item1 < (byte)EcuDiagAddress.BATTERY_ECU_ID)
+						{
+							result = "Main ECU";
+						}
+						else if (t.Item1 >= (byte)EcuDiagAddress.BATTERY_ECU_ID)
+						{
+							result = "BMS ECU";
+						}
+						
+					}
+					break;
+
+				case 1:
+					{
+						if (t.Item1 == 1)
+							result = "BMS COMBI";
+						else if (t.Item1 == 2)
+							result = "MARINE ECU";
+					}
+					break;
+
+				case 2:
+					{
+						int Ver_mj = t.Item1 >> 8;
+						int Ver_mn = t.Item1 & 0xff;
+						result = Ver_mj.ToString() + "." + Ver_mn.ToString();
+					}
+					break;
+
+				case 3:
+					{
+						int Ver_mj = t.Item1 >> 8;
+						int Ver_mn = t.Item1 & 0xff;
+						result = Ver_mj.ToString() + "." + Ver_mn.ToString();
+					}
+					break;
+			}
+
+			return result;
 		}
 
-		virtual async public Task<List<ResponseData_ReadDataByIdentifier>> GetEcuInfo()
-		{
-			return null;
-		}
+		#region Свойства
 
-        virtual async public Task<List<ResponseData_ReadDataByIdentifier>> GetEcuTime()
-        {
-            return null;
-        }
+		//		protected List<DiagnosticValueSet> Sets { get; set; }
 
-        virtual async public Task<bool> ClearFaults()
-        {
-            return false;
-        }
-
-        #region Свойства
-
-        //		protected List<DiagnosticValueSet> Sets { get; set; }
-
-        public byte Address { get; set; }
+		public byte Address { get; set; }
 
 		public EcuModelId ModelId { get; set; }
 		public byte UdsVersion { get; set; }
@@ -58,137 +116,12 @@ namespace BoadService
 		public UInt16 FwVersion { get; set; }
 		public string SerianNumber { get; set; }
 		public string PartNumber { get; set; }
-		public string ExtraInfo { get; set; }		
-		
-//		public string ClassIdString { get { return EcuClassId_String.ToString(ClassId); } }
-//		public string ModelIdString { get { return EcuModelId_String.ToString(ModelId); } }
+		public string ExtraInfo { get; set; }
 
-//		public virtual bool IsTimeServer { get { return false; } }
-//		public virtual bool IsPowerManager { get { return false; } }
+		//		public virtual bool IsTimeServer { get { return false; } }
+		//		public virtual bool IsPowerManager { get { return false; } }
 
 		#endregion
-
-		
-
-		//#region Запросы
-
-		//public async Task<bool> GetInfo()
-		//{
-		//	List<A_Service> sList;
-
-
-		//	// Запрос модели
-		//	sList = await Global.uds.ReadDataByID(Address, DID.didModelStr);
-		//	if (sList.Count == 1)
-		//	{
-		//		A_Service srv = sList[0];
-		//		if (srv.State == A_ServiceState.Timeout || srv.NResult != N_Result.N_OK)
-		//			return false;
-
-		//		A_Service_ReadDataByIdentifier s = srv as A_Service_ReadDataByIdentifier;
-		//		if (s.Response.Count > 0)
-		//			Model = s.Response[0].DV.GetStringValue();
-		//	}
-
-		//	// Запрос контроллера
-		//	sList = await Global.uds.ReadDataByID(Address, DID.didHardwareStr);
-		//	if (sList.Count == 1)
-		//	{
-		//		A_Service srv = sList[0];
-		//		if (srv.State == A_ServiceState.Timeout || srv.NResult != N_Result.N_OK)
-		//			return false;
-
-		//		A_Service_ReadDataByIdentifier s = srv as A_Service_ReadDataByIdentifier;
-		//		if (s.Response.Count > 0)
-		//			Hardware = s.Response[0].DV.GetStringValue();
-		//	}
-
-		//	// Запрос версии HW/FW
-		//	sList = await Global.uds.ReadDataByID(Address, DID.didVersion);
-		//	if (sList.Count == 1)
-		//	{
-		//		A_Service srv = sList[0];
-		//		if (srv.State == A_ServiceState.Timeout || srv.NResult != N_Result.N_OK)
-		//			return false;
-
-		//		A_Service_ReadDataByIdentifier s = srv as A_Service_ReadDataByIdentifier;
-
-		//		if (s.Response.Count >= 2)
-		//		{
-		//			HwVersion = (UInt16)s.Response[0].DV.GetNumericValue();
-		//			FwVersion = (UInt16)s.Response[1].DV.GetNumericValue();
-		//		}
-		//	}
-
-		//	// Запрос серийного номера
-		//	sList = await Global.uds.ReadDataByID(Address, DID.didECUSerialNumberDataIdentifier);
-		//	if (sList.Count == 1)
-		//	{
-		//		A_Service srv = sList[0];
-		//		if (srv.State == A_ServiceState.Timeout || srv.NResult != N_Result.N_OK)
-		//			return false;
-
-		//		A_Service_ReadDataByIdentifier s = srv as A_Service_ReadDataByIdentifier;
-		//		if (s.Response.Count > 0)
-		//			SerianNumber = s.Response[0].DV.GetStringValue();
-		//		else
-		//			SerianNumber = "";
-		//	}
-
-		//	// Запрос артикула
-		//	sList = await Global.uds.ReadDataByID(Address, DID.didPartNumberStr);
-		//	if (sList.Count == 1)
-		//	{
-		//		A_Service srv = sList[0];
-		//		if (srv.State == A_ServiceState.Timeout || srv.NResult != N_Result.N_OK)
-		//			return false;
-
-		//		A_Service_ReadDataByIdentifier s = srv as A_Service_ReadDataByIdentifier;
-		//		if (s.Response.Count > 0)
-		//			PartNumber = s.Response[0].DV.GetStringValue();
-		//	}
-
-		//	// Запрос дополнительной информации
-		//	sList = await Global.uds.ReadDataByID(Address, DID.didExtraStr);
-		//	if (sList.Count == 1)
-		//	{
-		//		A_Service srv = sList[0];
-		//		if (srv.State == A_ServiceState.Timeout || srv.NResult != N_Result.N_OK)
-		//			return false;
-
-		//		A_Service_ReadDataByIdentifier s = srv as A_Service_ReadDataByIdentifier;
-		//		if (s.Response.Count > 0)
-		//			ExtraInfo = s.Response[0].DV.GetStringValue();
-		//	}
-
-		//	// Запрос статусов (могут быть не у всех ЭБУ)
-		//	sList = await Global.uds.ReadDataByID(Address, DID.didStatus1);
-		//	if (sList.Count == 1)
-		//	{
-		//		A_Service srv = sList[0];
-		//		if (srv.State != A_ServiceState.Timeout && srv.NResult == N_Result.N_OK)
-		//		{
-		//			A_Service_ReadDataByIdentifier s = srv as A_Service_ReadDataByIdentifier;
-		//			if (s.Response.Count > 0)
-		//				ConvertStatuses(1, s.Response[0].DV);
-		//		}
-		//	}
-		//	sList = await Global.uds.ReadDataByID(Address, DID.didStatus2);
-		//	if (sList.Count == 1)
-		//	{
-		//		A_Service srv = sList[0];
-		//		if (srv.State != A_ServiceState.Timeout && srv.NResult == N_Result.N_OK)
-		//		{
-		//			A_Service_ReadDataByIdentifier s = srv as A_Service_ReadDataByIdentifier;
-		//			if (s.Response.Count > 0)
-		//				ConvertStatuses(2, s.Response[0].DV);
-		//		}
-		//	}
-
-		//	return true;
-		//}
-
-		//#endregion
 	}
 
 	// Типы датчиков тока
@@ -231,9 +164,10 @@ namespace BoadService
 	{
 		NONE = 0,
 		GENERAL_ECU_DIAG_ID = 1,
+		DISPLAY_ECU_DIAG_ID = 6,
 		MAIN_ECU_DIAG_ID	= 10,
 		BATTERY_ECU_ID		= 11,
-        DISPLAY_ECU_DIAG_ID = 51,
+        
 	}
 
 
@@ -242,8 +176,7 @@ namespace BoadService
 		public int DataID { get; set; }
 		public string StringDescription { private get; set; }
 		public double Factor { get; set; }
-		public bool IsSigned { get; set; }
-		public List<string> Value;
+		public bool IsSigned { get; set; }        
 		public byte NoteNumber { get; set; }
 
 		public string ToString(int NoteNum)
@@ -254,11 +187,9 @@ namespace BoadService
 		public override string ToString()
 		{
 			return StringDescription;
-		}
+		}		
 
-		Func<int, string> ValueHandler;
-
-		public DiagnosticData(ushort did, string Description, double factor, bool isSigned, byte noteNumber, Func<int, string> Handler)
+		public DiagnosticData(ushort did, string Description, double factor, bool isSigned, byte noteNumber, Func<Tuple<int, int>, string> Handler = null)
 		{
 			DataID = did;
 			StringDescription = Description;
@@ -266,18 +197,44 @@ namespace BoadService
 			IsSigned = isSigned;
 			NoteNumber = noteNumber;
 			Value = new List<string>(NoteNumber);
-			ValueHandler = Handler;
+            rowValue = new List<int>(NoteNumber);
+            ValueHandler = Handler;
 		}
 
+		public void ClearValues()
+		{
+			Value.Clear();
+		}
 		public void AddValue(int val)
 		{
-			if (ValueHandler != null)
-			{
-				Value.Add(ValueHandler(val));
-			}
-			else
-				Value.Add(val.ToString());
+            if (rowValue.Count >= NoteNumber)
+                rowValue.Clear();
+
+            rowValue.Add(val);
 		}
-	}
+
+        public List<string> GetValue()
+        {
+            int _currentNote = 0;
+            Value.Clear();
+            foreach (var v in rowValue)
+            {
+                if (ValueHandler != null)
+                    Value.Add(ValueHandler(new Tuple<int, int>(v, _currentNote++)));
+                else
+                {
+                    string format = (Factor == 1) ? "N0" : "N3";
+                    Value.Add(((float)v * Factor).ToString(format));
+                }
+            }
+
+            rowValue.Clear();
+            return Value;
+        }
+
+        List<int> rowValue;
+        Func<Tuple<int, int>, string> ValueHandler;
+		List<string> Value;
+	}   
 
 }

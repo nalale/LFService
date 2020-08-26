@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Xml;
 using System.Runtime.InteropServices;
 
-namespace BoadService
+namespace MFService
 {
 	/// <summary>
 	/// Interaction logic for Mcu_ECUCoding.xaml

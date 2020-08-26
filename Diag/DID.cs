@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BoadService
+namespace MFService
 {
 	//TODO: Написать функцию проверки, чтобы исключить дублирование DID параметров.
 	// См. ISO 14229-1, стр.345 (C.1 DID parameter definitions)

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -14,24 +15,24 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace BoadService
+namespace MFService
 {
 	/// <summary>
 	/// Логика взаимодействия для ECUMeasure.xaml
 	/// </summary>
 	public partial class ECUMeasure : UserControl
 	{
-		Thread task;
-		volatile bool procStop;
+		Task taskShow;
+		CancellationTokenSource cancelTaskShow;
+		
 
 		ECU ecu;
 		string dvsPath = "";
 		string logPath = "";
-		List<DiagnosticData> dvsList;
-		//List<byte> didList;
 
-		A_Service_ReadDataByIdentifier DiagSrv;
-		int comStat;
+		List<DiagnosticData> dvsList;
+		Diag.A_Service_ReadDataByIdentifier DiagSrv;
+		
 		int rxCnt;
 
 		public ECUMeasure()
@@ -42,8 +43,6 @@ namespace BoadService
 			this.Unloaded += ECUMeasure_Unloaded;
 			this.Dispatcher.ShutdownStarted += Dispatcher_ShutdownStarted;
 
-			listVal.SelectionChanged += ListVal_SelectionChanged;
-
 			dvsPath = Path.Combine(Environment.CurrentDirectory, "DVS");
 			if (Directory.Exists(dvsPath) == false)
 				Directory.CreateDirectory(dvsPath);
@@ -51,134 +50,69 @@ namespace BoadService
 			logPath = Path.Combine(Environment.CurrentDirectory, "LogFiles");
 			if (Directory.Exists(logPath) == false)
 				Directory.CreateDirectory(logPath);
+
+			
+			
 		}
 
 
 
-
-		#region Event Handlers
-
-		bool isSet;
+		#region Event Handlers		
 
 		private void ECUMeasure_Loaded(object sender, RoutedEventArgs e)
 		{
-			if (isSet)
-				return;
-
-			isSet = true;
-
-
-			btClearFilter.IsEnabled = false;
-			btSave.IsEnabled = false;
-			tbFilter.Text = "";
-
-			gridListVal.IsEnabled = true;
-
 			ecu = Global.EcuList.CurrentEcu;
 			dvsList = ecu.GetDiagnosticSets();
 
 			
-			DiagSrv = new A_Service_ReadDataByIdentifier();
+			DiagSrv = new Diag.A_Service_ReadDataByIdentifier();
 			FormatGrid_Vars();
 			FillValueList();
 
-			lbEcuInfo.Content = ecu.Model + " (" + ecu.Address + ")";
+			cancelTaskShow = new CancellationTokenSource();
+			CancellationToken token = cancelTaskShow.Token;
 
-			procStop = false;
-			task = new Thread(DoWork);
-			task.Start();
+			Task.Factory.StartNew(async () =>
+			{
+				while (!token.IsCancellationRequested)
+				{
+					if (DiagSrv.RequestedDIDs.Count > 0)
+					{
+						foreach (int i in DiagSrv.RequestedDIDs)
+						{
+							rxCnt++;
+							Thread.Sleep(10);
+							// Отправить запрос
+							if (await DiagSrv.RequestService(ecu.Address))
+							{
+								// Визуализация значений
+								await Dispatcher.BeginInvoke(new Action(() =>
+								{
+									UpdateCommunicationStatus();
+									ShowResponse(DiagSrv);
+								}));
+							}
+						}
+					}
+					else
+						Dispatcher.Invoke(ClearGrid_Vars);
+
+					Thread.Sleep(250);
+				}
+			}, token);
+
 		}
 
 		private void ECUMeasure_Unloaded(object sender, RoutedEventArgs e)
 		{
-			isSet = false;
-
-			if (!procStop)
-			{
-                parList.Clear();
-                DiagSrv.RequestDIDs.Clear();
-                procStop = true;
-				task.Join();
-
-			}
+			cancelTaskShow.Cancel();
+			parList.Clear();
 		}
 
 		private void Dispatcher_ShutdownStarted(object sender, EventArgs e)
 		{
 			ECUMeasure_Unloaded(sender, null);
 		}
-
-		// При выборе диагностической величины
-		private void ListVal_SelectionChanged(object sender, SelectionChangedEventArgs e)
-		{
-			List<byte> a = new List<byte>();
-			//a.Add((byte)dvsList[listVal.SelectedIndex].DataID);
-			//foreach (byte v in a)
-			//{
-			//	if (DiagSrv.RequestDIDs.Contains(v))
-			//	{
-			//		DiagSrv.RequestDIDs.Remove(v);
-			//	}
-
-			//	DiagSrv.RequestDIDs.Add(v);
-			//}
-			//foreach (string it in listVal.Items)
-			//{
-			//	//DiagnosticValueSet s = it.Tag as DiagnosticValueSet;
-			//	if (it.IsSelected)
-			//		a.Add((byte)it.Tag);
-			//	else
-			//		d.Add((byte)it.Tag);
-			//}
-
-			ListBoxItem lbItem = listVal.SelectedItem as ListBoxItem;
-
-            if (lbItem == null)
-                return;
-
-			int i = Convert.ToInt32(lbItem.Tag);
-			byte v = Convert.ToByte(lbItem.Tag);
-
-			
-
-			if (DiagSrv.RequestDIDs.Contains(v))
-			{
-				DiagSrv.RequestDIDs.Remove(v);
-                parList.Clear();
-                lbItem.Background = Brushes.Transparent;
-			}
-			else
-			{				
-				DiagSrv.RequestDIDs.Add(v);
-				lbItem.Background = Brushes.LightGray;
-			}
-
-
-
-			//btSave.IsEnabled = DiagSrv.RequestDIDs.Count > 0;
-		}
-
-		// Очистить фильтр
-		private void btClearFilter_Click(object sender, RoutedEventArgs e)
-		{
-			tbFilter.Text = "";
-		}
-
-		// При вводе фильтра
-		private void tbFilter_TextChanged(object sender, TextChangedEventArgs e)
-		{
-			if (tbFilter.Text.Length == 0)
-			{
-				btClearFilter.IsEnabled = false;
-			}
-			else
-			{
-				btClearFilter.IsEnabled = true;
-			}
-
-			FillValueList();
-		}
-
 		private void CommitButtonCLick(object sender, RoutedEventArgs e)
 		{
 			Button btn = sender as Button;
@@ -203,7 +137,20 @@ namespace BoadService
 
 			}
 		}
+		private void ParameterSelected(object sender, RoutedEventArgs e)
+		{
+			if (!(sender is CheckBox cb_param))
+				return;
 
+			byte v = Convert.ToByte(cb_param.Tag);
+
+			if (cb_param.IsChecked == false)
+				DiagSrv.RemoveRequestedDID(v);
+			else if (cb_param.IsChecked == true)
+				DiagSrv.AddRequestedDID(v);
+
+
+		}
 		#endregion
 
 
@@ -211,82 +158,25 @@ namespace BoadService
 
 		void FillValueList()
 		{
-			string f = tbFilter.Text.ToLower();
-			if (f.Length < 2)
-				f = "";
-
 			listVal.Items.Clear();
 
 			foreach (DiagnosticData it in dvsList)
 			{
-				ListBoxItem lbItem = new ListBoxItem();
-				lbItem.Content = it.ToString();
-				lbItem.Tag = it.DataID;
-				string li = it.ToString();
-				listVal.Items.Add(lbItem);
+                CheckBox cb = new CheckBox() { Content = it.ToString(), Tag = it.DataID };
+                cb.Checked += ParameterSelected;
+                cb.Unchecked += ParameterSelected;            
+
+				listVal.Items.Add(new ListBoxItem { Content = cb });
 			}
 		}
-		
-		void UpdateCommunicationStatus()
+        void UpdateCommunicationStatus()
 		{
-			switch (comStat)
-			{
-				case 0:
-					lbConnStat.Content = "|";
-					break;
-				case 1:
-					lbConnStat.Content = "/";
-					break;
-				case 2:
-					lbConnStat.Content = "—";
-					break;
-				case 3:
-					lbConnStat.Content = "\\";
-					break;
-				default:
-					break;
-			}
 
-			comStat++;
-			if (comStat > 3)
-				comStat = 0;
-		}
-
-		async void DoWork()
-		{
-			const int requestPeriod = 500;
-			
-			List<ResponseData_ReadDataByIdentifier> Response;
-			Dictionary<int, int> sList = new Dictionary<int, int>();
-
-			while (!procStop)
-			{
-				if (DiagSrv.RequestDIDs.Count > 0)
-				{
-					rxCnt++;
-
-					// Запрос диагностических значений
-					Response = await Global.diag.ReadDataByIDs(ecu.Address, DiagSrv.RequestDIDs.ToArray<byte>());
-
-					// Визуализация значений
-					await Dispatcher.BeginInvoke(new Action(() =>
-					{
-						UpdateCommunicationStatus();
-						FillGrid_Vars(Response);
-					}));
-				}
-                //else
-                //{
-                //	Dispatcher.BeginInvoke(new Action(() =>
-                //	{
-                //		FillGrid_Vars(new List<ResponseData_ReadDataByIdentifier>());
-                //	}));
-
-                //}
-
-                Thread.Sleep(requestPeriod);
-			}
-		}		
+            if (pbConnStat.Value < pbConnStat.Maximum)
+                pbConnStat.Value++;
+            else
+                pbConnStat.Value = pbConnStat.Minimum;
+        }
 
 		#endregion
 
@@ -295,8 +185,6 @@ namespace BoadService
 		#region DataGrid
 
 		ObservableCollection<GridPar> parList = new ObservableCollection<GridPar>();
-
-
 		void FormatGrid_Vars()
 		{
 			//dataGrid2.Items.Clear();
@@ -373,77 +261,68 @@ namespace BoadService
 
 			dGrid.ItemsSource = parList;
 		}
+        void ShowResponse(Diag.A_Service_ReadDataByIdentifier srvDataById)
+        {            
+            parList.Clear();
 
+            foreach (var did in srvDataById.RequestedDIDs)
+            {                
+                DiagnosticData dv = null;                
+                
+                // Найти в списке диагностических значений нужный 
+                dv = ecu.GetDiagnosticSets().Find((diag) => diag.DataID == did);
 
-		void FillGrid_Vars(List<ResponseData_ReadDataByIdentifier> vals)
-		{
-			//dGrid.ItemsSource = null;
-			parList.Clear();
+                // Если ЭБУ поддерживает запрашиваемый DID
+                if (dv != null)     
+                {
+                    foreach (int val in srvDataById.GetResponseValue(did))
+                        dv.AddValue(val);                      
+                
+                    int i = 0;
+                    List<string> values = dv.GetValue();
 
-			foreach (byte did in DiagSrv.RequestDIDs)
-			{
-				////Сопоставляем присланные данные с запрошенными, т.к. некоторые данные погут не поддерживаться ЭБУ.
-				DiagnosticData dv = null;
-
-				foreach (ResponseData_ReadDataByIdentifier it in vals)
-				{
-					if (it.DID == did)
-					{
-						// Найти в списке диагностических значений нужный 
-						dv = ecu.GetDiagnosticSets().Find((diag) => diag.DataID == did);
-						// Если ЭБУ поддерживает запрашиваемый DID
-						if (dv == null)
-							break;
-
-						for (int i = 0; i < it.DV.Count / 4; i++)
-							dv.AddValue(BitConverter.ToInt32(it.DV.ToArray(), i * 4));
-						break;						
-					}
-				}
-
-				if (dv != null)     // Если ЭБУ поддерживает запрашиваемый DID
-				{
-					int i = 0;
-					if (dv.Value.Count > 0)
-					{
-						foreach (string value in dv.Value)
-						{
-							parList.Add(new GridPar()
-							{
-								DID = did,
-								//Param = dv.ToString(),
-								Name = dv.ToString(++i),
-								Value = value,
-							});
-						}
-					}
-					else
-					{
-						parList.Add(new GridPar()
-						{
-							DID = did,
-							//Param = dv.ToString(),
-							Name = dv.ToString(++i),
-							Value = "-",
-						});
-					}
-				}
-				else    // Если ЭБУ не поддерживает запрашиваемый DID
-				{
-					parList.Add(new GridPar()
-					{
-						DID = 0,						
-						Name = "Некорректный DID",
-						Value = " - ",
-						TT = null,
-						BackColor = Brushes.Transparent,
-						ForeColor = Brushes.Black,
-					});
-				}
-			}
-		}
-
-
+                    if (values.Count > 0)
+                    {
+                        foreach (string value in values)
+                        {
+                            parList.Add(new GridPar()
+                            {
+                                DID = (ushort)did,
+                                //Param = dv.ToString(),
+                                Name = dv.ToString(++i),
+                                Value = value,
+                            });
+                        }
+                    }
+                    else
+                    {
+                        parList.Add(new GridPar()
+                        {
+                            DID = (ushort)did,
+                            //Param = dv.ToString(),
+                            Name = dv.ToString(++i),
+                            Value = "-",
+                        });
+                    }
+                }
+                else    // Если ЭБУ не поддерживает запрашиваемый DID
+                {
+                    parList.Add(new GridPar()
+                    {
+                        DID = 0,
+                        Name = "Некорректный DID",
+                        Value = " - ",
+                        TT = null,
+                        BackColor = Brushes.Transparent,
+                        ForeColor = Brushes.Black,
+                    });                    
+                }
+            }
+        }
+		void ClearGrid_Vars()
+        {
+            parList.Clear();
+        }
 
 		class GridPar : INotifyPropertyChanged
 		{
@@ -541,39 +420,7 @@ namespace BoadService
 
 	}
 
-	public class A_Service_ReadDataByIdentifier
-	{
-		public A_Service_ReadDataByIdentifier()
-		{
-			RequestDIDs = new List<byte>();
-			Response = new List<ResponseData_ReadDataByIdentifier>();
-		}
-
-
-		#region Свойства
-
-		public List<byte> RequestDIDs { get; set; }
-		public List<ResponseData_ReadDataByIdentifier> Response { get; private set; }
-
-
-		#endregion
-	}
-
-
-
-
-	public class ResponseData_ReadDataByIdentifier
-	{
-		public short DID;
-		public List<byte> DV;
-		public byte Result { get; set; }
-
-		public ResponseData_ReadDataByIdentifier(short did)
-		{
-			DID = did;
-			DV = new List<byte>();
-		}
-	}
+	
 	
 }
 

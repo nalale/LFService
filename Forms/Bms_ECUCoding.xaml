@@ -1,9 +1,9 @@
-﻿<UserControl x:Class="BoadService.Bms_ECUCoding"
+﻿<UserControl x:Class="MFService.Bms_ECUCoding"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:BoadService"
+        xmlns:local="clr-namespace:MFService"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d">
 
@@ -98,11 +98,7 @@
                 <StackPanel Margin="10,0,0,0">
                     <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
                         <Label Name="lblBatteries" Content="Модули"  FontWeight="Bold" Height="28" />
-                    </StackPanel>          
-                    <StackPanel Orientation="Horizontal">
-                        <Label Name="lblTotalCapacity" Content="Емкость модуля, Ач:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
-                        <TextBox x:Name="tbTotalCapacity" Height="23" Width="{StaticResource colWidth2}" Background="White" />
-                    </StackPanel>
+                    </StackPanel>                        
                     <StackPanel Orientation="Horizontal">
                         <Label Name="lblMaxDCL" Content="DCL модуля, А:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbMaxDCL" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
@@ -240,8 +236,16 @@
                         <Label Name="lblModules" Content="Модули" FontWeight="Bold" Height="28" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
+                        <Label Name="lblTotalCapacity" Content="Емкость модуля, Ач:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbTotalCapacity" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
                         <Label Name="lblCellNum" Content="Количество ячеек в модуле:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbCellNum" Height="23" Width="{StaticResource colWidth2}" Background="White" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Name="lblModulesInAssembly" Content="Количество модулей в сборке:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbModulesInAssembly" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Name="lblBalancingTime" Content="Время включения балансировки, сек:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
@@ -254,7 +258,7 @@
                     <StackPanel Orientation="Horizontal">
                         <Label Name="lblMaxBalancingDiff" Content="Допустимая разница напряжений ячеек, мВ:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbMaxBalancingDiff" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
-                    </StackPanel>
+                    </StackPanel>                    
 
                     <!--Зависимость ограничения тока от температуры на ячейках-->
                     <StackPanel Orientation="Horizontal" Background="{StaticResource BackgroundBrush}">
@@ -273,8 +277,8 @@
                             <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
 
-                        <Label Name="lblOCV" Content="SOC, %" Style="{StaticResource lbCap}" Width="48" />
-                        <Label Content="U, mV" Style="{StaticResource lbCap}" Grid.Row="1" />
+                        <Label Name="lblOCV" Content="U, mV" Style="{StaticResource lbCap}" Width="48" />
+                        <Label Content="SOC, %" Style="{StaticResource lbCap}" Grid.Row="1" />
 
 
                         <StackPanel Orientation="Horizontal" Grid.Column="1">
@@ -363,7 +367,7 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal">
-                        <Label Name="lblSwitchedOff" Content="Отключен:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <Label Name="lblSwitchedOff" Content="Тестовый режим:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <CheckBox Name="checkOffline"  Width="{StaticResource colWidth2}" VerticalAlignment="Center" />
                     </StackPanel>
 

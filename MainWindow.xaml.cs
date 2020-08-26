@@ -15,7 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using DEService;
 
-namespace BoadService
+namespace MFService
 {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml

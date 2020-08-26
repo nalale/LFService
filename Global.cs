@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using DEService;
 
-namespace BoadService
+namespace MFService
 {
 	public static class Global
 	{

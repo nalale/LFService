@@ -6,13 +6,14 @@ using System.Threading;
 
 using DEService;
 
-namespace BoadService.Diag
+namespace MFService.Diag
 {
 	class N_Diag
 	{
 		ICanDriver can;
 		N_Message nmsg;
 		object locker;
+		SortedDictionary<uint, int> lstIDs;
 
 		public event Action<N_Message> OnRxComplete;
 		public event Action<N_Message> OnTxComplete;
@@ -30,26 +31,28 @@ namespace BoadService.Diag
 			this.can.OnReadMessage += ProcessMessage;
 
 			this.nmsg = new N_Message();
+			lstIDs = new SortedDictionary<uint, int>();
 
-            rxTimer = new System.Timers.Timer(100);
+			rxTimer = new System.Timers.Timer(100);
             rxTimer.Elapsed += RxTimer_Elapsed;
             
         }
 
         private void RxTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            
-            if (nmsg.TA > 0 && RequestCnt < 10)
-            {
-                RequestCnt++;
-                nmsg.State = N_State.TX_SEND;
-                NSend(nmsg);
-            }
-            else if(RequestCnt >= 10)
-            {
-                rxTimer.Stop();
-            }
-        }
+			//rxTimer.Stop();
+
+			if (nmsg.TA > 0 && RequestCnt < 10)
+			{
+				RequestCnt++;
+				nmsg.State = N_State.TX_SEND;
+				NSend(nmsg);
+			}
+			else if (RequestCnt >= 10)
+			{
+				rxTimer.Stop();
+			}
+		}
 
         #region Threading        
 
@@ -172,15 +175,34 @@ namespace BoadService.Diag
 				}	
 				else if((msg.id & ~0x7F) == 0x700)
 				{
-                    if (OnRxIDsComplete != null)
-                    {
-                        N_Message loc_msg = new N_Message();
+					uint id = msg.id & 0x7F;				
 
-                        loc_msg.Result = N_Res.OK_UPDATE_PROFILE;
-                        loc_msg.TA = (byte)(msg.id & 0x7F);
+					if(lstIDs.ContainsKey(id))
+					{
+						lstIDs[id] = Convert.ToInt32(DateTime.Now.TimeOfDay.TotalSeconds);						
+					}
+					else
+						lstIDs.Add(id, Convert.ToInt32(DateTime.Now.TimeOfDay.TotalSeconds));
 
-                        OnRxIDsComplete?.Invoke(loc_msg);                        
-                    }
+					uint old_key = UInt32.MaxValue;
+					foreach (var item in lstIDs)
+					{
+						old_key = (Convert.ToInt32(DateTime.Now.TimeOfDay.TotalSeconds) - item.Value > 5) ? item.Key : old_key;
+					}
+
+					if(old_key < Byte.MaxValue)
+						lstIDs.Remove(old_key);
+					
+
+                    //if (OnRxIDsComplete != null)
+                    //{
+                    //    N_Message loc_msg = new N_Message();
+
+                    //    loc_msg.Result = N_Res.OK_UPDATE_PROFILE;
+                    //    loc_msg.TA = (byte)(msg.id & 0x7F);
+
+                    //    OnRxIDsComplete?.Invoke(loc_msg);                        
+                    //}
 
 				}
 			}
@@ -235,15 +257,10 @@ namespace BoadService.Diag
 
             NSend(nmsg);
 		}
-
-        private void NMsgClear(N_Message nmsg)
-        {
-            nmsg.TA = 0x00;
-            nmsg.MsgNum = 0;
-            nmsg.Index = 00;
-            nmsg.State = N_State.IDLE;
-            nmsg.MsgType = 0;
-        }
+		public IEnumerable<uint> GetOnlineIds()
+		{
+			return lstIDs.Keys;
+		}
 
 		#endregion
 
