@@ -62,7 +62,7 @@
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal">
-                        <Label Name="lblBatteryId" Content="Номер параллельной линии:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <Label Name="lblBatteryId" Content="Номер батареи:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbBatteryID" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
@@ -108,13 +108,17 @@
                         <TextBox x:Name="tbMaxCCL" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
+                        <Label Name="lblModulesInAssembly" Content="Количество батарей:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <TextBox x:Name="tbModulesInAssembly" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
                         <Label Name="lblModuleCntS" Content="Кол. модулей последовательно:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbModuleCountS" Height="23" Width="{StaticResource colWidth2}" Background="White" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
-                        <Label Name="lblModuleCntP" Content="Кол. линий параллельно:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
+                        <Label Name="lblModuleCntP" Content="Кол. модулей параллельно:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbModuleCountP" Height="23" Width="{StaticResource colWidth2}" Background="White" />
-                    </StackPanel>
+                    </StackPanel>                    
                     <StackPanel Orientation="Horizontal">
                         <Label Name="lblMaxDisbalanceVoltageS" Content="Макс разница напряжений последовательно, В:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbMaxDisbalanceVoltageS" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
@@ -243,10 +247,7 @@
                         <Label Name="lblCellNum" Content="Количество ячеек в модуле:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbCellNum" Height="23" Width="{StaticResource colWidth2}" Background="White" />
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Name="lblModulesInAssembly" Content="Количество модулей в сборке:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
-                        <TextBox x:Name="tbModulesInAssembly" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
-                    </StackPanel>
+                    
                     <StackPanel Orientation="Horizontal">
                         <Label Name="lblBalancingTime" Content="Время включения балансировки, сек:" Width="{StaticResource colWidth}" Style="{StaticResource lbCap}" />
                         <TextBox x:Name="tbBalancingTime" Height="23" Width="{StaticResource colWidth2}" Background="White"/>
